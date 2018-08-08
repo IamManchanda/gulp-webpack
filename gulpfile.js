@@ -2,13 +2,16 @@ const gulp = require('gulp');
 const gulpUglifyEs = require('gulp-uglify-es').default;
 const gulpLiveReload = require('gulp-livereload');
 const gulpConcat = require('gulp-concat');
-const gulpMinifyCss = require('gulp-minify-css');
 const gulpAutoprefixer = require('gulp-autoprefixer');
 const gulpPlumber = require('gulp-plumber');
 const gulpSourcemaps = require('gulp-sourcemaps');
+const gulpSass = require('gulp-sass');
 
 const distPath = (file) => `./public/dist/${file}`;
-const srcPath = (file) => `./public/src/${file}/**/*.${file}`;
+const srcPath = (file) => {
+  if (file === 'scss') return `./public/src/${file}/styles.${file}`;
+  return `./public/src/${file}/**/*.${file}`;
+};
 const autoprefixConfig = {
   // https://caniuse.com/#search=flex
   browsers: [
@@ -33,24 +36,23 @@ gulp.task('images', () => {
   console.log('Starting Images task');
 });
 
-// Styles
+// Styles (SCSS)
 gulp.task('styles', () => {
   return gulp
-    .src(['./public/src/css/reset.css', srcPath('css')])
+    .src(srcPath('scss'))
     .pipe( gulpPlumber(function (err) {
       console.error('Styles Task Error', err);
       this.emit('end');
     }) )
     .pipe( gulpSourcemaps.init() )
     .pipe( gulpAutoprefixer(autoprefixConfig) )
-    .pipe( gulpConcat('styles.css') )
-    .pipe( gulpMinifyCss() )
+    .pipe( gulpSass({ outputStyle: 'compressed' }) )
     .pipe( gulpSourcemaps.write() )
     .pipe( gulp.dest(distPath('css')) )
     .pipe( gulpLiveReload() );
 });
 
-// Scripts
+// Scripts (JavaScript)
 gulp.task('scripts', () => {
   return gulp
     .src(srcPath('js'))
@@ -68,6 +70,6 @@ gulp.task('default', () => {
 // Watch
 gulp.task('watch', () => {
   gulpLiveReload.listen();
-  gulp.watch(srcPath('css'), ['styles']);
+  gulp.watch(srcPath('scss'), ['styles']);
   gulp.watch(srcPath('js'), ['scripts']);
 });
