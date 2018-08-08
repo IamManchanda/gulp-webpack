@@ -1,11 +1,13 @@
 const gulp = require('gulp');
-const gulpUglifyEs = require('gulp-uglify-es').default;
+const pump = require('pump');
+const gulpUglify = require('gulp-uglify');
 const gulpLiveReload = require('gulp-livereload');
 const gulpConcat = require('gulp-concat');
 const gulpAutoprefixer = require('gulp-autoprefixer');
 const gulpPlumber = require('gulp-plumber');
 const gulpSourcemaps = require('gulp-sourcemaps');
 const gulpSass = require('gulp-sass');
+const gulpBabel = require('gulp-babel');
 
 const distPath = (file) => `./public/dist/${file}`;
 const srcPath = (file) => {
@@ -53,19 +55,21 @@ gulp.task('styles', () => {
 });
 
 // Scripts (JS)
-gulp.task('scripts', () => {
-  return gulp
-    .src(srcPath('js'))
-    .pipe( gulpPlumber(function (err) {
+gulp.task('scripts', (cb) => {
+  pump([
+    gulp.src(srcPath('js')),
+    gulpPlumber(function (err) {
       console.error('Scripts Task Error', err);
       this.emit('end');
-    }) )
-    .pipe( gulpSourcemaps.init() )
-    .pipe( gulpUglifyEs() )
-    .pipe( gulpConcat('scripts.js') )
-    .pipe( gulpSourcemaps.write() )
-    .pipe( gulp.dest(distPath('js')) )
-    .pipe( gulpLiveReload() );
+    }),
+    gulpSourcemaps.init(),
+    gulpBabel({ presets: ['env'] }),
+    gulpConcat('scripts.js'),
+    gulpUglify(),
+    gulpSourcemaps.write(),
+    gulp.dest(distPath('js')),
+    gulpLiveReload(),
+  ], cb);
 });
 
 // Default
