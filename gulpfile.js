@@ -52,12 +52,18 @@ gulp.task('styles', () => {
     .pipe( gulpLiveReload() );
 });
 
-// Scripts (JavaScript)
+// Scripts (JS)
 gulp.task('scripts', () => {
   return gulp
     .src(srcPath('js'))
-    .pipe( gulpConcat('scripts.js') )
+    .pipe( gulpPlumber(function (err) {
+      console.error('Scripts Task Error', err);
+      this.emit('end');
+    }) )
+    .pipe( gulpSourcemaps.init() )
     .pipe( gulpUglifyEs() )
+    .pipe( gulpConcat('scripts.js') )
+    .pipe( gulpSourcemaps.write() )
     .pipe( gulp.dest(distPath('js')) )
     .pipe( gulpLiveReload() );
 });
