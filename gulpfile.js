@@ -60,12 +60,12 @@ gulp.task('scripts', (cb) => {
 });
 
 // Default
-gulp.task('default', () => {
+gulp.task('default', ['images', 'styles', 'scripts'], () => {
   console.log('Starting Default task');
 });
 
 // Watch
-gulp.task('watch', () => {
+gulp.task('watch', ['default'], () => {
   gulpLiveReload.listen();
   gulp.watch(srcPath('scss'), ['styles']);
   gulp.watch(srcPath('js'), ['scripts']);
