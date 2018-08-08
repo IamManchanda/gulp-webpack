@@ -8,30 +8,16 @@ const gulpPlumber = require('gulp-plumber');
 const gulpSourcemaps = require('gulp-sourcemaps');
 const gulpSass = require('gulp-sass');
 const gulpBabel = require('gulp-babel');
+const supportedBrowsers = require('./supported-browsers');
 
 const distPath = (file) => `./public/dist/${file}`;
 const srcPath = (file) => {
   if (file === 'scss') return `./public/src/${file}/styles.${file}`;
   return `./public/src/${file}/**/*.${file}`;
 };
-const autoprefixConfig = {
-  // https://caniuse.com/#search=flex
-  browsers: [
-    'last 2 versions',
-    'ie >= 10',
-    'edge >= 12',
-    'firefox >= 28',
-    'chrome >= 21',
-    'safari >= 6.1',
-    'opera >= 12.1',
-    'ios >= 7',
-    'android >= 4.4',
-    'blackberry >= 10',
-    'operamobile >= 12.1',
-    'samsung >= 4',
-  ],
-  cascade: false,
-};
+
+const autoprefixConfig = { browsers: supportedBrowsers, cascade: false };
+const babelConfig = { targets: { browsers: supportedBrowsers } };
 
 // Images
 gulp.task('images', () => {
@@ -39,19 +25,20 @@ gulp.task('images', () => {
 });
 
 // Styles (SCSS)
-gulp.task('styles', () => {
-  return gulp
-    .src(srcPath('scss'))
-    .pipe( gulpPlumber(function (err) {
+gulp.task('styles', (cb) => {
+  pump([
+    gulp.src(srcPath('scss')),
+    gulpPlumber(function (err) {
       console.error('Styles Task Error', err);
       this.emit('end');
-    }) )
-    .pipe( gulpSourcemaps.init() )
-    .pipe( gulpAutoprefixer(autoprefixConfig) )
-    .pipe( gulpSass({ outputStyle: 'compressed' }) )
-    .pipe( gulpSourcemaps.write() )
-    .pipe( gulp.dest(distPath('css')) )
-    .pipe( gulpLiveReload() );
+    }),
+    gulpSourcemaps.init(),
+    gulpAutoprefixer(autoprefixConfig),
+    gulpSass({ outputStyle: 'compressed' }),
+    gulpSourcemaps.write(),
+    gulp.dest(distPath('css')),
+    gulpLiveReload(),
+  ], cb);
 });
 
 // Scripts (JS)
@@ -63,7 +50,7 @@ gulp.task('scripts', (cb) => {
       this.emit('end');
     }),
     gulpSourcemaps.init(),
-    gulpBabel({ presets: ['env'] }),
+    gulpBabel({ presets: [['env', babelConfig]] }),
     gulpConcat('scripts.js'),
     gulpUglify(),
     gulpSourcemaps.write(),
