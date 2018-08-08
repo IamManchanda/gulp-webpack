@@ -1,5 +1,9 @@
+@import 'reset/base';
+
+$primary-background-color: #D1E5E1;
+
 body {
-  background-color: #D1E5E1;
+  background-color: $primary-background-color;
   display: flex;
   align-items: center;
   justify-content: center;
