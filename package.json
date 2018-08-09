@@ -5,6 +5,14 @@
   "main": "index.js",
   "author": "Harry Manchanda",
   "license": "MIT",
+  "scripts": {
+    "images": "gulp images",
+    "styles": "gulp styles",
+    "scripts": "gulp scripts",
+    "clean": "gulp clean",
+    "watch": "gulp watch",
+    "start": "gulp"
+  },
   "devDependencies": {
     "babel-core": "^6.26.3",
     "babel-preset-env": "^1.7.0",

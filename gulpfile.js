@@ -87,7 +87,7 @@ gulp.task('clean', () => {
 
 // Default
 gulp.task('default', ['clean', 'images', 'styles', 'scripts'], () => {
-  console.log('Starting Default task');
+  console.log('Starting All tasks');
 });
 
 // Watch
