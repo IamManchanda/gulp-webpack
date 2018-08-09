@@ -87,6 +87,7 @@ gulp.task('clean', () => {
   ]);
 });
 
+// Delete the zip
 gulp.task('delete-zip', () => {
   return del.sync([
     './website.zip',
