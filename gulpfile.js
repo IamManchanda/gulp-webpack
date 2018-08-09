@@ -1,5 +1,6 @@
 const gulp = require('gulp');
 const pump = require('pump');
+const del = require('del');
 const gulpUglify = require('gulp-uglify');
 const gulpLiveReload = require('gulp-livereload');
 const gulpConcat = require('gulp-concat');
@@ -11,32 +12,33 @@ const gulpBabel = require('gulp-babel');
 const gulpImagemin = require('gulp-imagemin');
 const imageminPngquant = require('imagemin-pngquant');
 const imageminJpegRecompress = require('imagemin-jpeg-recompress');
-
 const supportedBrowsers = require('./supported-browsers');
 
+const autoprefixConfig = { browsers: supportedBrowsers, cascade: false };
+const babelConfig = { targets: { browsers: supportedBrowsers } };
+
+const srcPathForImages = './public/src/img/**/*.{png,jpeg,jpg,svg,gif}';
+const distPathForImages = './public/dist/img';
 const distPathForCode = (file) => `./public/dist/${file}`;
 const srcPathForCode = (file) => {
   if (file === 'scss') return `./public/src/${file}/styles.${file}`;
   return `./public/src/${file}/**/*.${file}`;
 };
-const srcPathForImages = './public/src/img/**/*.{png,jpeg,jpg,svg,gif}';
-const distPathForImages = './public/dist/img';
-
-const autoprefixConfig = { browsers: supportedBrowsers, cascade: false };
-const babelConfig = { targets: { browsers: supportedBrowsers } };
 
 // Images
-gulp.task('images', () => {
-  return gulp.src(srcPathForImages)
-    .pipe( gulpImagemin([
+gulp.task('images', (cb) => {
+  pump([
+    gulp.src(srcPathForImages),
+    gulpImagemin([
       gulpImagemin.gifsicle(),
       gulpImagemin.jpegtran(),
       gulpImagemin.optipng(),
       gulpImagemin.svgo(),
       imageminPngquant(),
       imageminJpegRecompress(),
-    ]) )
-    .pipe( gulp.dest(distPathForImages) );
+    ]),
+    gulp.dest(distPathForImages),
+  ], cb);
 });
 
 // Styles (SCSS)
@@ -74,8 +76,17 @@ gulp.task('scripts', (cb) => {
   ], cb);
 });
 
+// Clean
+gulp.task('clean', () => {
+  return del.sync([
+    distPathForCode('css'),
+    distPathForCode('js'),
+    distPathForImages,
+  ]);
+});
+
 // Default
-gulp.task('default', ['images', 'styles', 'scripts'], () => {
+gulp.task('default', ['clean', 'images', 'styles', 'scripts'], () => {
   console.log('Starting Default task');
 });
 

@@ -1,3 +1,6 @@
+// https://caniuse.com/#search=flex
+// https://caniuse.com/#search=es5
+
 const supportedBrowsers = [
   'last 3 versions', // http://browserl.ist/?q=last+3+versions
   'ie >= 10', // http://browserl.ist/?q=ie+%3E%3D+10
