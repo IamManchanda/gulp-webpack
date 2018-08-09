@@ -1,6 +1,7 @@
 const gulp = require('gulp');
 const pump = require('pump');
 const del = require('del');
+const gulpZip = require('gulp-zip');
 const gulpUglify = require('gulp-uglify');
 const gulpLiveReload = require('gulp-livereload');
 const gulpConcat = require('gulp-concat');
@@ -17,6 +18,7 @@ const supportedBrowsers = require('./browsers');
 const autoprefixConfig = { browsers: supportedBrowsers, cascade: false };
 const babelConfig = { targets: { browsers: supportedBrowsers } };
 
+const exportPathForZipping = './public/**/*';
 const srcPathForImages = './public/src/img/**/*.{png,jpeg,jpg,svg,gif}';
 const distPathForImages = './public/dist/img';
 const distPathForCode = (file) => `./public/dist/${file}`;
@@ -85,6 +87,12 @@ gulp.task('clean', () => {
   ]);
 });
 
+gulp.task('delete-zip', () => {
+  return del.sync([
+    './website.zip',
+  ]);
+});
+
 // Default
 gulp.task('default', ['clean', 'images', 'styles', 'scripts'], () => {
   console.log('Starting All tasks');
@@ -96,4 +104,13 @@ gulp.task('watch', ['default'], () => {
   gulpLiveReload.listen();
   gulp.watch(srcPathForCode('scss'), ['styles']);
   gulp.watch(srcPathForCode('js'), ['scripts']);
+});
+
+// Export 
+gulp.task('export', ['delete-zip'], () => {
+  pump([
+    gulp.src(exportPathForZipping),
+    gulpZip('./website.zip'),
+    gulp.dest('./'),
+  ]);
 });

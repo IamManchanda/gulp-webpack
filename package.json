@@ -6,12 +6,9 @@
   "author": "Harry Manchanda",
   "license": "MIT",
   "scripts": {
-    "images": "gulp images",
-    "styles": "gulp styles",
-    "scripts": "gulp scripts",
-    "clean": "gulp clean",
     "build": "gulp",
-    "start": "gulp watch"
+    "start": "gulp watch",
+    "export": "gulp export"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
@@ -29,6 +26,7 @@
     "gulp-sass": "^4.0.1",
     "gulp-sourcemaps": "^2.6.4",
     "gulp-uglify": "^3.0.1",
+    "gulp-zip": "^4.2.0",
     "imagemin-gifsicle": "^5.2.0",
     "imagemin-jpeg-recompress": "^5.1.0",
     "imagemin-jpegtran": "^5.0.2",
