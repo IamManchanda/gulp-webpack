@@ -10,8 +10,8 @@
     "styles": "gulp styles",
     "scripts": "gulp scripts",
     "clean": "gulp clean",
-    "watch": "gulp watch",
-    "start": "gulp"
+    "build": "gulp",
+    "watch": "gulp watch"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",

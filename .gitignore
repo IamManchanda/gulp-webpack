@@ -76,3 +76,6 @@ jspm_packages
 
 # Nuxt generate
 dist
+
+# Build Files
+public/dist
