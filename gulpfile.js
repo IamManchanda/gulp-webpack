@@ -12,7 +12,7 @@ const gulpBabel = require('gulp-babel');
 const gulpImagemin = require('gulp-imagemin');
 const imageminPngquant = require('imagemin-pngquant');
 const imageminJpegRecompress = require('imagemin-jpeg-recompress');
-const supportedBrowsers = require('./supported-browsers');
+const supportedBrowsers = require('./browsers');
 
 const autoprefixConfig = { browsers: supportedBrowsers, cascade: false };
 const babelConfig = { targets: { browsers: supportedBrowsers } };
@@ -92,6 +92,7 @@ gulp.task('default', ['clean', 'images', 'styles', 'scripts'], () => {
 
 // Watch
 gulp.task('watch', ['default'], () => {
+  require('./server');
   gulpLiveReload.listen();
   gulp.watch(srcPathForCode('scss'), ['styles']);
   gulp.watch(srcPathForCode('js'), ['scripts']);

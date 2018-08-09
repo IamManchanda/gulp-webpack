@@ -11,7 +11,7 @@
     "scripts": "gulp scripts",
     "clean": "gulp clean",
     "build": "gulp",
-    "watch": "gulp watch"
+    "start": "gulp watch"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
@@ -38,6 +38,7 @@
     "pump": "^3.0.0"
   },
   "dependencies": {
-    "gulp-livereload": "^3.8.1"
+    "gulp-livereload": "^3.8.1",
+    "static-server": "^2.2.1"
   }
 }
