@@ -8,7 +8,6 @@ const browserSync = require('browser-sync').create();
 const vinylNamed = require('vinyl-named');
 const through2 = require('through2');
 const gulpZip = require('gulp-zip');
-const gulpUglify = require('gulp-uglify');
 const gulpAutoprefixer = require('gulp-autoprefixer');
 const gulpSourcemaps = require('gulp-sourcemaps');
 const gulpSass = require('gulp-sass');
@@ -75,38 +74,33 @@ const images = (done) => {
   ], done);
 };
 
-// Styles Task for Development
-const devStyles = (done) => {
+// Styles Task
+const styles = (done, mode) => {
+  let outputStyle;
+  if (mode === 'development') outputStyle = 'nested';
+  else if (mode === 'production') outputStyle = 'compressed';
   pump([
     gulp.src(srcPath('scss')),
     gulpSourcemaps.init({ loadMaps: true }),
     gulpAutoprefixer(autoprefixConfig),
-    gulpSass({ outputStyle: 'nested' }),
+    gulpSass({ outputStyle }),
     gulpSourcemaps.write('./'),
     gulp.dest(distPath('css')),
     browserSync.stream(),
   ], done);
 };
+const devStyles = (done) => styles(done, 'development');
+const prodStyles = (done) => styles(done, 'production');
 
-// Styles Task for Production
-const prodStyles = (done) => {
-  pump([
-    gulp.src(srcPath('scss')),
-    gulpSourcemaps.init({ loadMaps: true }),
-    gulpAutoprefixer(autoprefixConfig),
-    gulpSass({ outputStyle: 'compressed' }),
-    gulpSourcemaps.write('./'),
-    gulp.dest(distPath('css')),
-    browserSync.stream(),
-  ], done);
-};
-
-// Scripts Task for Development
-const devScripts = (done) => {
+// Scripts Task
+const scripts = (done, mode) => {
+  let streamMode;
+  if (mode === 'development') streamMode = require('./webpack/config.development.js');
+  else if (mode === 'production') streamMode = require('./webpack/config.production.js');
   pump([
     gulp.src(srcPath('js')),
     vinylNamed(),
-    webpackStream(require('./webpack/config.dev.js'), webpack),
+    webpackStream(streamMode, webpack),
     gulpSourcemaps.init({ loadMaps: true }),
     through2.obj(function (file, enc, cb) {
       const isSourceMap = /\.map$/.test(file.path);
@@ -119,26 +113,8 @@ const devScripts = (done) => {
     browserSync.stream(),
   ], done);
 };
-
-// Scripts Task for Production
-const prodScripts = (done) => {
-  pump([
-    gulp.src(srcPath('js')),
-    vinylNamed(),
-    webpackStream(require('./webpack/config.prod.js'), webpack),
-    gulpSourcemaps.init({ loadMaps: true }),
-    through2.obj(function (file, enc, cb) {
-      const isSourceMap = /\.map$/.test(file.path);
-      if (!isSourceMap) this.push(file);
-      cb();
-    }),
-    gulpBabel({ presets: [['env', babelConfig]] }),
-    gulpUglify(),
-    gulpSourcemaps.write('./'),
-    gulp.dest(distPath('js')),
-    browserSync.stream(),
-  ], done);
-};
+const devScripts = (done) => scripts(done, 'development');
+const prodScripts = (done) => scripts(done, 'production');
 
 /**
  * Main Gulp Tasks that are inserted within `package.json`
