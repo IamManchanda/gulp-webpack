@@ -19,12 +19,15 @@ const autoprefixConfig = { browsers: supportedBrowsers, cascade: false };
 const babelConfig = { targets: { browsers: supportedBrowsers } };
 
 const exportPathForZipping = './public/**/*';
-const srcPath = (file) => {
-  if (file === 'scss') return './public/src/scss/styles.scss';
-  if (file === 'js') return './public/src/js/scripts.js';
+const srcPath = (file, watch = false) => {
+  if (file === 'scss' && watch === false) return './public/src/scss/styles.scss';
+  if (file === 'scss' && watch === true) return './public/src/scss/**/*.scss';
+  if (file === 'js' && watch === false) return './public/src/js/scripts.js';
+  if (file === 'js' && watch === true) return './public/src/js/**/*.js';
   if (file === 'img') return './public/src/img/**/*.{png,jpeg,jpg,svg,gif}';
   console.error('Unsupported file type entered into Gulp Task Runner for Source Path');
 };
+
 const distPath = (file) => {
   if (['css', 'js', 'img'].includes(file)) return `./public/dist/${file}`;
   console.error('Unsupported file type entered into Gulp Task Runner for Dist Path');
@@ -82,23 +85,37 @@ gulp.task('scripts', (done) => {
 });
 
 // Clean
-gulp.task('clean', () => {
+gulp.task('cleanAll', () => {
   return del([
+    distPath('img'),
     distPath('css'),
     distPath('js'),
+  ]);
+});
+
+// Clean Images
+gulp.task('cleanImages', () => {
+  return del([
     distPath('img'),
   ]);
 });
 
-// Delete the zip
-gulp.task('delete-zip', () => {
+// Clean Styles
+gulp.task('cleanStyles', () => {
   return del([
-    './website.zip',
+    distPath('css'),
+  ]);
+});
+
+// Clean
+gulp.task('cleanScripts', () => {
+  return del([
+    distPath('js'),
   ]);
 });
 
 // Default
-gulp.task('default', gulp.series('clean', 'images', 'styles', 'scripts', (done) => {
+gulp.task('default', gulp.series('cleanAll', 'images', 'styles', 'scripts', (done) => {
   done();
 }));
 
@@ -106,13 +123,21 @@ gulp.task('default', gulp.series('clean', 'images', 'styles', 'scripts', (done) 
 gulp.task('watch', gulp.series('default', (done) => {
   require('./server');
   gulpLiveReload.listen();
-  gulp.watch(srcPath('scss'), gulp.series('styles'));
-  gulp.watch(srcPath('js'), gulp.series('scripts'));
+  gulp.watch(srcPath('img', true), gulp.series('cleanImages', 'images'));
+  gulp.watch(srcPath('scss', true), gulp.series('cleanStyles', 'styles'));
+  gulp.watch(srcPath('js', true), gulp.series('cleanScripts', 'scripts'));
   done();
 }));
 
+// Delete the zip
+gulp.task('cleanExport', () => {
+  return del([
+    './website.zip',
+  ]);
+});
+
 // Export 
-gulp.task('export', gulp.series('delete-zip', (done) => {
+gulp.task('export', gulp.series('cleanExport', (done) => {
   pump([
     gulp.src(exportPathForZipping),
     gulpZip('./website.zip'),
