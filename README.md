@@ -19,7 +19,7 @@
 
 ## Appendix
 
-- **Tooling** - Lives in `gulpfile.js` and files within `tooling` folder
+- **Tooling** - Lives in `gulpfile.js` and files within `tooling` folder. Special mentions `webpack.dev.js` and `webpack.prod.js`
 - **Source Files** - Lives in `public/dist` folder
 - **Compiled Files** - Lives in `public/src` folder
 - **Exported Project** - The exported project is imported from `public` folder and gets exported as `website.zip` to project root
