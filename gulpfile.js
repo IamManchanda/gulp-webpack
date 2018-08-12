@@ -21,7 +21,7 @@ const babelConfig = { targets: { browsers: supportedBrowsers } };
 const exportPathForZipping = './public/**/*';
 const srcPath = (file) => {
   if (file === 'scss') return './public/src/scss/styles.scss';
-  if (file === 'js') return './public/src/js/scripts.js';
+  if (file === 'js') return './public/src/js/**/*.js';
   if (file === 'img') return './public/src/img/**/*.{png,jpeg,jpg,svg,gif}';
   console.error('Unsupported file type entered into Gulp Task Runner for Source Path');
 };
@@ -54,10 +54,10 @@ gulp.task('styles', (cb) => {
       console.error('Styles Task Error', err);
       this.emit('end');
     }),
-    gulpSourcemaps.init(),
+    gulpSourcemaps.init({ loadMaps: true }),
     gulpAutoprefixer(autoprefixConfig),
     gulpSass({ outputStyle: 'compressed' }),
-    gulpSourcemaps.write(),
+    gulpSourcemaps.write('./'),
     gulp.dest(distPath('css')),
     gulpLiveReload(),
   ], cb);
@@ -71,11 +71,11 @@ gulp.task('scripts', (cb) => {
       console.error('Scripts Task Error', err);
       this.emit('end');
     }),
-    gulpSourcemaps.init(),
+    gulpSourcemaps.init({ loadMaps: true }),
     gulpBabel({ presets: [['env', babelConfig]] }),
     gulpConcat('scripts.js'),
     gulpUglify(),
-    gulpSourcemaps.write(),
+    gulpSourcemaps.write('./'),
     gulp.dest(distPath('js')),
     gulpLiveReload(),
   ], cb);
