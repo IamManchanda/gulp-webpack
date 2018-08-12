@@ -18,7 +18,7 @@ const imageminPngquant = require('imagemin-pngquant');
 const imageminJpegRecompress = require('imagemin-jpeg-recompress');
 
 // Supported Browsers
-const supportedBrowsers = require('./browsers');
+const supportedBrowsers = require('./tooling/browsers');
 
 // Config
 const autoprefixConfig = { browsers: supportedBrowsers, cascade: false };
@@ -76,7 +76,7 @@ gulp.task('styles', (done) => {
 gulp.task('scripts', (done) => {
   pump([
     gulp.src(srcPath('js')),
-    webpackStream(require('./webpack.config.js'), webpack),
+    webpackStream(require('./tooling/webpack.config.js'), webpack),
     gulpPlumber(function (err) {
       console.error('Scripts Task Error', err);
       this.emit('end');
@@ -107,7 +107,7 @@ gulp.task('default', gulp.series('cleanImages', 'images', 'cleanStyles', 'styles
 
 // Watch
 gulp.task('watch', gulp.series('default', (done) => {
-  require('./server');
+  require('./tooling/server');
   gulpLiveReload.listen();
   gulp.watch(srcPath('img', true), gulp.series('cleanImages', 'images'));
   gulp.watch(srcPath('scss', true), gulp.series('cleanStyles', 'styles'));

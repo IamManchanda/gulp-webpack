@@ -16,3 +16,9 @@
 - **Start the Project** - `npm start` or `yarn start`
 - **Build the Project** - `npm run build` or `yarn run build`
 - **Exporting the Project** - `npm run export` or `yarn run export`
+
+## Appendix
+
+- **Tooling** - Lives in `gulpfile.js` and files within `tooling` folder
+- **Source Files** - Lives in `dist` folder
+- **Compiled Files** - Lives in `src` folder
