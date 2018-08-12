@@ -19,8 +19,7 @@
 
 ## Appendix
 
-- **Development Server**: Server starts on `http://localhost:3000/`. You can change the port number [from here](./tooling/server.js)
-- **Tooling** - Gulpfile Lives in `./gulpfile.js` and webpack config files live within `webpack` folder.
+- **Tooling** - Gulpfile Lives in `gulpfile.js` and webpack config files live within `webpack` folder.
 - **Source Files** - Lives in `public/dist` folder
 - **Compiled Files** - Lives in `public/src` folder
 - **Exported Project** - The exported project is imported from `public` folder and gets exported as `website.zip` to project root
