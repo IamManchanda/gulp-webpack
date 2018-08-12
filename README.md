@@ -1,10 +1,11 @@
-# Gulp + Webpack Stream + Babel
+# Gulp 4 + Webpack 4 + Webpack Stream + Babel
 
 ## Setup
 
 - Install [Node](https://nodejs.org/)
 - Optionally, also install [Yarn](https://yarnpkg.com/) or use *Npm* that comes with Node pre-installed
-- Install Gulp globally through `npm install gulp@next`
+- Install Gulp globally through `npm install -g gulp@next`
+- Install Webpack globally through `npm install -g webpack`
 - Fork this project
 - Clone the forked project (Yours!)
 - `cd` to the cloned project
