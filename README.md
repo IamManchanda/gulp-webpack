@@ -13,12 +13,13 @@
 
 ## Usage
 
-- **Start the Project (for Development)** - `npm start` or `yarn start`
+- **Start the Project (for Development)** - `npm start` or `yarn start`.
 - **Build the Project (for Production)** - `npm run build` or `yarn run build`
 - **Exporting the Project to zip file** - `npm run export` or `yarn run export`
 
 ## Appendix
 
+- **Development Server**: Server starts on `http://localhost:3000/`. You can change the port number [from here](./tooling/server.js)
 - **Tooling** - Lives in `gulpfile.js` and files within `tooling` folder. Special mentions `webpack.dev.js` and `webpack.prod.js`
 - **Source Files** - Lives in `public/dist` folder
 - **Compiled Files** - Lives in `public/src` folder
