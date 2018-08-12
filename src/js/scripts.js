@@ -1,3 +1,5 @@
+import secondary from './secondary';
+
 class Person {
   constructor(name) {
     this.name = name;
@@ -11,3 +13,4 @@ class Person {
 
 const harry = new Person('Harman Manchanda');
 document.write(harry.hello());
+console.log(secondary());

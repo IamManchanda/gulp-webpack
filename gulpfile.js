@@ -2,6 +2,7 @@
 const gulp = require('gulp');
 const pump = require('pump');
 const del = require('del');
+const webpackStream = require('webpack-stream');
 const gulpZip = require('gulp-zip');
 const gulpUglify = require('gulp-uglify');
 const gulpLiveReload = require('gulp-livereload');
@@ -74,6 +75,12 @@ gulp.task('styles', (done) => {
 gulp.task('scripts', (done) => {
   pump([
     gulp.src(srcPath('js')),
+    webpackStream({
+      mode: 'production',
+      output: {
+        filename: 'scripts.js',
+      },    
+    }),
     gulpPlumber(function (err) {
       console.error('Scripts Task Error', err);
       this.emit('end');
