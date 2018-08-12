@@ -136,10 +136,10 @@ gulp.task('default', gulp.series('cleanImages', 'images', 'cleanStyles', 'devSty
   browserSync.init({
     server: './public',
   });
-  gulp.watch(srcPath('img', true), gulp.series('cleanImages', 'images'));
-  gulp.watch(srcPath('scss', true), gulp.series('cleanStyles', 'devStyles'));
-  gulp.watch(srcPath('js', true), gulp.series('cleanScripts', 'devScripts'));
-  gulp.watch('./public/index.html').on('change', browserSync.reload);
+  gulp.watch(srcPath('img', true)).on('all', gulp.series('cleanImages', 'images'), browserSync.reload);
+  gulp.watch(srcPath('scss', true)).on('all', gulp.series('cleanStyles', 'devStyles'), browserSync.reload);
+  gulp.watch(srcPath('js', true)).on('all', gulp.series('cleanScripts', 'devScripts'), browserSync.reload);
+  gulp.watch('./public/**/*.html').on('all', browserSync.reload);
   done();
 }));
 
