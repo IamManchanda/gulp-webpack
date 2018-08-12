@@ -106,8 +106,8 @@ gulp.task('default', gulp.series('clean', 'images', 'styles', 'scripts', (done) 
 gulp.task('watch', gulp.series('default', (done) => {
   require('./server');
   gulpLiveReload.listen();
-  gulp.watch(srcPath('scss'), gulp.parallel('styles'));
-  gulp.watch(srcPath('js'), gulp.parallel('scripts'));
+  gulp.watch(srcPath('scss'), gulp.series('styles'));
+  gulp.watch(srcPath('js'), gulp.series('scripts'));
   done();
 }));
 
