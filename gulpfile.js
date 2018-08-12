@@ -1,3 +1,4 @@
+// Node Packages
 const gulp = require('gulp');
 const pump = require('pump');
 const del = require('del');
@@ -13,11 +14,15 @@ const gulpBabel = require('gulp-babel');
 const gulpImagemin = require('gulp-imagemin');
 const imageminPngquant = require('imagemin-pngquant');
 const imageminJpegRecompress = require('imagemin-jpeg-recompress');
+
+// Supported Browsers
 const supportedBrowsers = require('./browsers');
 
+// Config
 const autoprefixConfig = { browsers: supportedBrowsers, cascade: false };
 const babelConfig = { targets: { browsers: supportedBrowsers } };
 
+// Paths for reuse
 const exportPath = './public/**/*';
 const srcPath = (file, watch = false) => {
   if (file === 'scss' && watch === false) return './src/scss/styles.scss';
@@ -27,7 +32,6 @@ const srcPath = (file, watch = false) => {
   if (file === 'img') return './src/img/**/*.{png,jpeg,jpg,svg,gif}';
   console.error('Unsupported file type entered into Gulp Task Runner for Source Path');
 };
-
 const distPath = (file) => {
   if (['css', 'js', 'img'].includes(file)) return `./public/dist/${file}`;
   console.error('Unsupported file type entered into Gulp Task Runner for Dist Path');
@@ -85,25 +89,13 @@ gulp.task('scripts', (done) => {
 });
 
 // Clean Images
-gulp.task('cleanImages', () => {
-  return del([
-    distPath('img'),
-  ]);
-});
+gulp.task('cleanImages', () => del([distPath('img')]));
 
 // Clean Styles
-gulp.task('cleanStyles', () => {
-  return del([
-    distPath('css'),
-  ]);
-});
+gulp.task('cleanStyles', () => del([distPath('css')]));
 
-// Clean
-gulp.task('cleanScripts', () => {
-  return del([
-    distPath('js'),
-  ]);
-});
+// Clean Scripts
+gulp.task('cleanScripts', () => del([distPath('js')]));
 
 // Default
 gulp.task('default', gulp.series('cleanImages', 'images', 'cleanStyles', 'styles', 'cleanScripts', 'scripts', (done) => {
@@ -121,11 +113,7 @@ gulp.task('watch', gulp.series('default', (done) => {
 }));
 
 // Delete the exported zip file
-gulp.task('cleanExport', () => {
-  return del([
-    './website.zip',
-  ]);
-});
+gulp.task('cleanExport', () => del(['./website.zip']));
 
 // Export to a zip file
 gulp.task('export', gulp.series('cleanExport', 'default', (done) => {
