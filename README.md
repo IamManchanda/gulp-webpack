@@ -1,4 +1,4 @@
-# Gulp 4 + Webpack 4 + Webpack Stream + Babel + BrowserSync
+# Gulp 4 + Webpack 4 + Babel + BrowserSync
 
 ## Setup
 
