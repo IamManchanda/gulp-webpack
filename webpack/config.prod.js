@@ -3,7 +3,5 @@
 
 module.exports = {
   mode: 'production',
-  output: {
-    filename: 'scripts.js',
-  },
+  devtool: 'source-map',
 };

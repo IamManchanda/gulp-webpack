@@ -5,6 +5,8 @@ const del = require('del');
 const webpack = require('webpack');
 const webpackStream = require('webpack-stream');
 const browserSync = require('browser-sync').create();
+const vinylNamed = require('vinyl-named');
+const through2 = require('through2');
 const gulpZip = require('gulp-zip');
 const gulpUglify = require('gulp-uglify');
 const gulpAutoprefixer = require('gulp-autoprefixer');
@@ -103,8 +105,14 @@ gulp.task('prodStyles', (done) => {
 gulp.task('devScripts', (done) => {
   pump([
     gulp.src(srcPath('js')),
+    vinylNamed(),
     webpackStream(require('./webpack/config.dev.js'), webpack),
     gulpSourcemaps.init({ loadMaps: true }),
+    through2.obj(function (file, enc, cb) {
+      const isSourceMap = /\.map$/.test(file.path);
+      if (!isSourceMap) this.push(file);
+      cb();
+    }),
     gulpBabel({ presets: [['env', babelConfig]] }),
     gulpSourcemaps.write('./'),
     gulp.dest(distPath('js')),
@@ -116,8 +124,14 @@ gulp.task('devScripts', (done) => {
 gulp.task('prodScripts', (done) => {
   pump([
     gulp.src(srcPath('js')),
+    vinylNamed(),
     webpackStream(require('./webpack/config.prod.js'), webpack),
     gulpSourcemaps.init({ loadMaps: true }),
+    through2.obj(function (file, enc, cb) {
+      const isSourceMap = /\.map$/.test(file.path);
+      if (!isSourceMap) this.push(file);
+      cb();
+    }),
     gulpBabel({ presets: [['env', babelConfig]] }),
     gulpUglify(),
     gulpSourcemaps.write('./'),

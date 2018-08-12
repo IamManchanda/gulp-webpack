@@ -3,7 +3,5 @@
 
 module.exports = {
   mode: 'development',
-  output: {
-    filename: 'scripts.js',
-  },
+  devtool: 'inline-cheap-source-map',
 };
