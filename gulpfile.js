@@ -19,18 +19,21 @@ const autoprefixConfig = { browsers: supportedBrowsers, cascade: false };
 const babelConfig = { targets: { browsers: supportedBrowsers } };
 
 const exportPathForZipping = './public/**/*';
-const srcPathForImages = './public/src/img/**/*.{png,jpeg,jpg,svg,gif}';
-const distPathForImages = './public/dist/img';
-const distPathForCode = (file) => `./public/dist/${file}`;
-const srcPathForCode = (file) => {
-  if (file === 'scss') return `./public/src/${file}/styles.${file}`;
-  return `./public/src/${file}/**/*.${file}`;
+const srcPath = (file) => {
+  if (file === 'scss') return './public/src/scss/styles.scss';
+  if (file === 'js') return './public/src/js/scripts.js';
+  if (file === 'img') return './public/src/img/**/*.{png,jpeg,jpg,svg,gif}';
+  console.error('Unsupported file type entered into Gulp Task Runner for Source Path');
+};
+const distPath = (file) => {
+  if (['css', 'js', 'img'].includes(file)) return `./public/dist/${file}`;
+  console.error('Unsupported file type entered into Gulp Task Runner for Dist Path');
 };
 
 // Images
 gulp.task('images', (cb) => {
   pump([
-    gulp.src(srcPathForImages),
+    gulp.src(srcPath('img')),
     gulpImagemin([
       gulpImagemin.gifsicle(),
       gulpImagemin.jpegtran(),
@@ -39,14 +42,14 @@ gulp.task('images', (cb) => {
       imageminPngquant(),
       imageminJpegRecompress(),
     ]),
-    gulp.dest(distPathForImages),
+    gulp.dest(distPath('img')),
   ], cb);
 });
 
 // Styles (SCSS)
 gulp.task('styles', (cb) => {
   pump([
-    gulp.src(srcPathForCode('scss')),
+    gulp.src(srcPath('scss')),
     gulpPlumber(function (err) {
       console.error('Styles Task Error', err);
       this.emit('end');
@@ -55,7 +58,7 @@ gulp.task('styles', (cb) => {
     gulpAutoprefixer(autoprefixConfig),
     gulpSass({ outputStyle: 'compressed' }),
     gulpSourcemaps.write(),
-    gulp.dest(distPathForCode('css')),
+    gulp.dest(distPath('css')),
     gulpLiveReload(),
   ], cb);
 });
@@ -63,7 +66,7 @@ gulp.task('styles', (cb) => {
 // Scripts (JS)
 gulp.task('scripts', (cb) => {
   pump([
-    gulp.src(srcPathForCode('js')),
+    gulp.src(srcPath('js')),
     gulpPlumber(function (err) {
       console.error('Scripts Task Error', err);
       this.emit('end');
@@ -73,7 +76,7 @@ gulp.task('scripts', (cb) => {
     gulpConcat('scripts.js'),
     gulpUglify(),
     gulpSourcemaps.write(),
-    gulp.dest(distPathForCode('js')),
+    gulp.dest(distPath('js')),
     gulpLiveReload(),
   ], cb);
 });
@@ -81,9 +84,9 @@ gulp.task('scripts', (cb) => {
 // Clean
 gulp.task('clean', () => {
   return del.sync([
-    distPathForCode('css'),
-    distPathForCode('js'),
-    distPathForImages,
+    distPath('css'),
+    distPath('js'),
+    distPath('img'),
   ]);
 });
 
@@ -103,8 +106,8 @@ gulp.task('default', ['clean', 'images', 'styles', 'scripts'], () => {
 gulp.task('watch', ['default'], () => {
   require('./server');
   gulpLiveReload.listen();
-  gulp.watch(srcPathForCode('scss'), ['styles']);
-  gulp.watch(srcPathForCode('js'), ['scripts']);
+  gulp.watch(srcPath('scss'), ['styles']);
+  gulp.watch(srcPath('js'), ['scripts']);
 });
 
 // Export 

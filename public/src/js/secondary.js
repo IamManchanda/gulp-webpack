@@ -1,4 +1,5 @@
-const max = 10;
-for (let i = 0; i < max; i += 1) {  
-  console.log(i);
-}
+const secondary = function () {
+  return 'Secondary Script';
+};
+
+export default secondary;
