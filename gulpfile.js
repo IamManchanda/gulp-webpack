@@ -31,7 +31,7 @@ const distPath = (file) => {
 };
 
 // Images
-gulp.task('images', (cb) => {
+gulp.task('images', (done) => {
   pump([
     gulp.src(srcPath('img')),
     gulpImagemin([
@@ -43,11 +43,11 @@ gulp.task('images', (cb) => {
       imageminJpegRecompress(),
     ]),
     gulp.dest(distPath('img')),
-  ], cb);
+  ], done);
 });
 
 // Styles (SCSS)
-gulp.task('styles', (cb) => {
+gulp.task('styles', (done) => {
   pump([
     gulp.src(srcPath('scss')),
     gulpPlumber(function (err) {
@@ -60,11 +60,11 @@ gulp.task('styles', (cb) => {
     gulpSourcemaps.write('./'),
     gulp.dest(distPath('css')),
     gulpLiveReload(),
-  ], cb);
+  ], done);
 });
 
 // Scripts (JS)
-gulp.task('scripts', (cb) => {
+gulp.task('scripts', (done) => {
   pump([
     gulp.src(srcPath('js')),
     gulpPlumber(function (err) {
@@ -78,12 +78,12 @@ gulp.task('scripts', (cb) => {
     gulpSourcemaps.write('./'),
     gulp.dest(distPath('js')),
     gulpLiveReload(),
-  ], cb);
+  ], done);
 });
 
 // Clean
 gulp.task('clean', () => {
-  return del.sync([
+  return del([
     distPath('css'),
     distPath('js'),
     distPath('img'),
@@ -92,29 +92,30 @@ gulp.task('clean', () => {
 
 // Delete the zip
 gulp.task('delete-zip', () => {
-  return del.sync([
+  return del([
     './website.zip',
   ]);
 });
 
 // Default
-gulp.task('default', ['clean', 'images', 'styles', 'scripts'], () => {
-  console.log('Starting All tasks');
-});
+gulp.task('default', gulp.series('clean', 'images', 'styles', 'scripts', (done) => {
+  done();
+}));
 
 // Watch
-gulp.task('watch', ['default'], () => {
+gulp.task('watch', gulp.series('default', (done) => {
   require('./server');
   gulpLiveReload.listen();
-  gulp.watch(srcPath('scss'), ['styles']);
-  gulp.watch(srcPath('js'), ['scripts']);
-});
+  gulp.watch(srcPath('scss'), gulp.parallel('styles'));
+  gulp.watch(srcPath('js'), gulp.parallel('scripts'));
+  done();
+}));
 
 // Export 
-gulp.task('export', ['delete-zip'], () => {
+gulp.task('export', gulp.series('delete-zip', (done) => {
   pump([
     gulp.src(exportPathForZipping),
     gulpZip('./website.zip'),
     gulp.dest('./'),
-  ]);
-});
+  ], done);
+}));
