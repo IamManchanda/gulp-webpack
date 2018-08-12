@@ -53,13 +53,13 @@ const distPath = (file) => {
 };
 
 // Cleaning Tasks
-gulp.task('cleanImages', () => del([distPath('img')])); // Clean Images
-gulp.task('cleanStyles', () => del([distPath('css')])); // Clean Styles
-gulp.task('cleanScripts', () => del([distPath('js')])); // Clean Scripts
-gulp.task('cleanExport', () => del(['./website.zip'])); // Clean Exported zip
+const cleanImages = () => del([distPath('img')]); // Clean Images
+const cleanStyles = () => del([distPath('css')]); // Clean Styles
+const cleanScripts = () => del([distPath('js')]); // Clean Scripts
+const cleanExport = () => del(['./website.zip']); // Clean Exported zip
 
 // Images Task
-gulp.task('images', (done) => {
+const images = (done) => {
   pump([
     gulp.src(srcPath('img')),
     gulpImagemin([
@@ -73,10 +73,10 @@ gulp.task('images', (done) => {
     gulp.dest(distPath('img')),
     browserSync.stream(),
   ], done);
-});
+};
 
 // Styles Task for Development
-gulp.task('devStyles', (done) => {
+const devStyles = (done) => {
   pump([
     gulp.src(srcPath('scss')),
     gulpSourcemaps.init({ loadMaps: true }),
@@ -86,10 +86,10 @@ gulp.task('devStyles', (done) => {
     gulp.dest(distPath('css')),
     browserSync.stream(),
   ], done);
-});
+};
 
 // Styles Task for Production
-gulp.task('prodStyles', (done) => {
+const prodStyles = (done) => {
   pump([
     gulp.src(srcPath('scss')),
     gulpSourcemaps.init({ loadMaps: true }),
@@ -99,10 +99,10 @@ gulp.task('prodStyles', (done) => {
     gulp.dest(distPath('css')),
     browserSync.stream(),
   ], done);
-});
+};
 
 // Scripts Task for Development
-gulp.task('devScripts', (done) => {
+const devScripts = (done) => {
   pump([
     gulp.src(srcPath('js')),
     vinylNamed(),
@@ -118,10 +118,10 @@ gulp.task('devScripts', (done) => {
     gulp.dest(distPath('js')),
     browserSync.stream(),
   ], done);
-});
+};
 
 // Scripts Task for Production
-gulp.task('prodScripts', (done) => {
+const prodScripts = (done) => {
   pump([
     gulp.src(srcPath('js')),
     vinylNamed(),
@@ -138,7 +138,7 @@ gulp.task('prodScripts', (done) => {
     gulp.dest(distPath('js')),
     browserSync.stream(),
   ], done);
-});
+};
 
 /**
  * Main Gulp Tasks that are inserted within `package.json`
@@ -146,24 +146,24 @@ gulp.task('prodScripts', (done) => {
 */
 
 // Default (`npm start` or `yarn start`)
-gulp.task('default', gulp.series('cleanImages', 'images', 'cleanStyles', 'devStyles', 'cleanScripts', 'devScripts', (done) => {
+gulp.task('default', gulp.series(cleanImages, images, cleanStyles, devStyles, cleanScripts, devScripts, (done) => {
   browserSync.init({
     server: './public',
   });
-  gulp.watch(srcPath('img', true)).on('all', gulp.series('cleanImages', 'images'), browserSync.reload);
-  gulp.watch(srcPath('scss', true)).on('all', gulp.series('cleanStyles', 'devStyles'), browserSync.reload);
-  gulp.watch(srcPath('js', true)).on('all', gulp.series('cleanScripts', 'devScripts'), browserSync.reload);
+  gulp.watch(srcPath('img', true)).on('all', gulp.series(cleanImages, images), browserSync.reload);
+  gulp.watch(srcPath('scss', true)).on('all', gulp.series(cleanStyles, devStyles), browserSync.reload);
+  gulp.watch(srcPath('js', true)).on('all', gulp.series(cleanScripts, devScripts), browserSync.reload);
   gulp.watch('./public/**/*.html').on('all', browserSync.reload);
   done();
 }));
 
 // Build (`npm run build` or `yarn run build`)
-gulp.task('build', gulp.series('cleanImages', 'images', 'cleanStyles', 'prodStyles', 'cleanScripts', 'prodScripts', (done) => {
+gulp.task('build', gulp.series(cleanImages, images, cleanStyles, prodStyles, cleanScripts, prodScripts, (done) => {
   done();
 }));
 
 // Export (`npm run export` or `yarn run export`)
-gulp.task('export', gulp.series('cleanExport', 'default', (done) => {
+gulp.task('export', gulp.series(cleanExport, 'build', (done) => {
   pump([
     gulp.src(exportPath),
     gulpZip('./website.zip'),
