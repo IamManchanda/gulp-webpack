@@ -21,7 +21,7 @@ const babelConfig = { targets: { browsers: supportedBrowsers } };
 const exportPathForZipping = './public/**/*';
 const srcPath = (file) => {
   if (file === 'scss') return './public/src/scss/styles.scss';
-  if (file === 'js') return './public/src/js/**/*.js';
+  if (file === 'js') return './public/src/js/scripts.js';
   if (file === 'img') return './public/src/img/**/*.{png,jpeg,jpg,svg,gif}';
   console.error('Unsupported file type entered into Gulp Task Runner for Source Path');
 };
