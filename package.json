@@ -6,8 +6,8 @@
   "author": "Harry Manchanda",
   "license": "MIT",
   "scripts": {
-    "build": "gulp",
-    "start": "gulp watch",
+    "start": "gulp",
+    "build": "gulp build",
     "export": "gulp export"
   },
   "devDependencies": {
@@ -20,9 +20,7 @@
     "gulp": "^4.0.0",
     "gulp-autoprefixer": "^5.0.0",
     "gulp-babel": "^7.0.1",
-    "gulp-concat": "^2.6.1",
     "gulp-imagemin": "^4.1.0",
-    "gulp-plumber": "^1.2.0",
     "gulp-sass": "^4.0.1",
     "gulp-sourcemaps": "^2.6.4",
     "gulp-uglify": "^3.0.1",

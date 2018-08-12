@@ -7,9 +7,7 @@ const webpackStream = require('webpack-stream');
 const gulpZip = require('gulp-zip');
 const gulpUglify = require('gulp-uglify');
 const gulpLiveReload = require('gulp-livereload');
-const gulpConcat = require('gulp-concat');
 const gulpAutoprefixer = require('gulp-autoprefixer');
-const gulpPlumber = require('gulp-plumber');
 const gulpSourcemaps = require('gulp-sourcemaps');
 const gulpSass = require('gulp-sass');
 const gulpBabel = require('gulp-babel');
@@ -39,7 +37,13 @@ const distPath = (file) => {
   console.error('Unsupported file type entered into Gulp Task Runner for Dist Path');
 };
 
-// Images
+// Cleaning Tasks
+gulp.task('cleanImages', () => del([distPath('img')])); // Clean Images
+gulp.task('cleanStyles', () => del([distPath('css')])); // Clean Styles
+gulp.task('cleanScripts', () => del([distPath('js')])); // Clean Scripts
+gulp.task('cleanExport', () => del(['./website.zip'])); // Clean Exported zip
+
+// Images Task
 gulp.task('images', (done) => {
   pump([
     gulp.src(srcPath('img')),
@@ -55,70 +59,78 @@ gulp.task('images', (done) => {
   ], done);
 });
 
-// Styles (SCSS)
-gulp.task('styles', (done) => {
+// Styles Task for Development
+gulp.task('devStyles', (done) => {
   pump([
     gulp.src(srcPath('scss')),
-    gulpPlumber(function (err) {
-      console.error('Styles Task Error', err);
-      this.emit('end');
-    }),
     gulpSourcemaps.init({ loadMaps: true }),
     gulpAutoprefixer(autoprefixConfig),
-    gulpSass({ outputStyle: 'compressed' }),
+    gulpSass({ outputStyle: 'nested' }),
     gulpSourcemaps.write('./'),
     gulp.dest(distPath('css')),
     gulpLiveReload(),
   ], done);
 });
 
-// Scripts (JS)
-gulp.task('scripts', (done) => {
+// Styles Task for Production
+gulp.task('prodStyles', (done) => {
+  pump([
+    gulp.src(srcPath('scss')),
+    gulpSourcemaps.init({ loadMaps: true }),
+    gulpAutoprefixer(autoprefixConfig),
+    gulpSass({ outputStyle: 'compressed' }),
+    gulpSourcemaps.write('./'),
+    gulp.dest(distPath('css')),
+  ], done);
+});
+
+// Scripts Task for Development
+gulp.task('devScripts', (done) => {
   pump([
     gulp.src(srcPath('js')),
-    webpackStream(require('./tooling/webpack.config.js'), webpack),
-    gulpPlumber(function (err) {
-      console.error('Scripts Task Error', err);
-      this.emit('end');
-    }),
+    webpackStream(require('./tooling/webpack.prod.js'), webpack),
     gulpSourcemaps.init({ loadMaps: true }),
     gulpBabel({ presets: [['env', babelConfig]] }),
-    gulpConcat('scripts.js'),
-    gulpUglify(),
     gulpSourcemaps.write('./'),
     gulp.dest(distPath('js')),
     gulpLiveReload(),
   ], done);
 });
 
-// Clean Images
-gulp.task('cleanImages', () => del([distPath('img')]));
+// Scripts Task for Production
+gulp.task('prodScripts', (done) => {
+  pump([
+    gulp.src(srcPath('js')),
+    webpackStream(require('./tooling/webpack.prod.js'), webpack),
+    gulpSourcemaps.init({ loadMaps: true }),
+    gulpBabel({ presets: [['env', babelConfig]] }),
+    gulpUglify(),
+    gulpSourcemaps.write('./'),
+    gulp.dest(distPath('js')),
+  ], done);
+});
 
-// Clean Styles
-gulp.task('cleanStyles', () => del([distPath('css')]));
+/**
+ * Main Gulp Tasks that are inserted within `package.json`
+ * Above tasks inserted in these main gulp tasks through `gulp.series`
+*/
 
-// Clean Scripts
-gulp.task('cleanScripts', () => del([distPath('js')]));
-
-// Default
-gulp.task('default', gulp.series('cleanImages', 'images', 'cleanStyles', 'styles', 'cleanScripts', 'scripts', (done) => {
-  done();
-}));
-
-// Watch
-gulp.task('watch', gulp.series('default', (done) => {
+// Default (`npm start` or `yarn start`)
+gulp.task('default', gulp.series('cleanImages', 'images', 'cleanStyles', 'devStyles', 'cleanScripts', 'devScripts', (done) => {
   require('./tooling/server');
   gulpLiveReload.listen();
   gulp.watch(srcPath('img', true), gulp.series('cleanImages', 'images'));
-  gulp.watch(srcPath('scss', true), gulp.series('cleanStyles', 'styles'));
-  gulp.watch(srcPath('js', true), gulp.series('cleanScripts', 'scripts'));
+  gulp.watch(srcPath('scss', true), gulp.series('cleanStyles', 'devStyles'));
+  gulp.watch(srcPath('js', true), gulp.series('cleanScripts', 'devScripts'));
   done();
 }));
 
-// Delete the exported zip file
-gulp.task('cleanExport', () => del(['./website.zip']));
+// Build (`npm run build` or `yarn run build`)
+gulp.task('build', gulp.series('cleanImages', 'images', 'cleanStyles', 'prodStyles', 'cleanScripts', 'prodScripts', (done) => {
+  done();
+}));
 
-// Export to a zip file
+// Export (`npm run export` or `yarn run export`)
 gulp.task('export', gulp.series('cleanExport', 'default', (done) => {
   pump([
     gulp.src(exportPath),

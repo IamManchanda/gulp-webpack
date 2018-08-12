@@ -13,9 +13,9 @@
 
 ## Usage
 
-- **Start the Project** - `npm start` or `yarn start`
-- **Build the Project** - `npm run build` or `yarn run build`
-- **Exporting the Project** - `npm run export` or `yarn run export`
+- **Start the Project (for Development)** - `npm start` or `yarn start`
+- **Build the Project (for Production)** - `npm run build` or `yarn run build`
+- **Exporting the Project to zip file** - `npm run export` or `yarn run export`
 
 ## Appendix
 
