@@ -13,6 +13,7 @@
   "devDependencies": {
     "babel-core": "^6.26.3",
     "babel-preset-env": "^1.7.0",
+    "browser-sync": "^2.24.6",
     "del": "^3.0.0",
     "eslint": "^5.2.0",
     "eslint-config-airbnb-base": "^13.0.0",
@@ -37,7 +38,6 @@
     "webpack-stream": "^5.1.1"
   },
   "dependencies": {
-    "gulp-livereload": "^3.8.1",
     "static-server": "^2.2.1"
   }
 }

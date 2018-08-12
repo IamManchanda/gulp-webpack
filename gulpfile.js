@@ -4,9 +4,9 @@ const pump = require('pump');
 const del = require('del');
 const webpack = require('webpack');
 const webpackStream = require('webpack-stream');
+const browserSync = require('browser-sync').create();
 const gulpZip = require('gulp-zip');
 const gulpUglify = require('gulp-uglify');
-const gulpLiveReload = require('gulp-livereload');
 const gulpAutoprefixer = require('gulp-autoprefixer');
 const gulpSourcemaps = require('gulp-sourcemaps');
 const gulpSass = require('gulp-sass');
@@ -56,6 +56,7 @@ gulp.task('images', (done) => {
       imageminJpegRecompress(),
     ]),
     gulp.dest(distPath('img')),
+    browserSync.stream(),
   ], done);
 });
 
@@ -68,7 +69,7 @@ gulp.task('devStyles', (done) => {
     gulpSass({ outputStyle: 'nested' }),
     gulpSourcemaps.write('./'),
     gulp.dest(distPath('css')),
-    gulpLiveReload(),
+    browserSync.stream(),
   ], done);
 });
 
@@ -81,6 +82,7 @@ gulp.task('prodStyles', (done) => {
     gulpSass({ outputStyle: 'compressed' }),
     gulpSourcemaps.write('./'),
     gulp.dest(distPath('css')),
+    browserSync.stream(),
   ], done);
 });
 
@@ -93,7 +95,7 @@ gulp.task('devScripts', (done) => {
     gulpBabel({ presets: [['env', babelConfig]] }),
     gulpSourcemaps.write('./'),
     gulp.dest(distPath('js')),
-    gulpLiveReload(),
+    browserSync.stream(),
   ], done);
 });
 
@@ -107,6 +109,7 @@ gulp.task('prodScripts', (done) => {
     gulpUglify(),
     gulpSourcemaps.write('./'),
     gulp.dest(distPath('js')),
+    browserSync.stream(),
   ], done);
 });
 
@@ -117,11 +120,13 @@ gulp.task('prodScripts', (done) => {
 
 // Default (`npm start` or `yarn start`)
 gulp.task('default', gulp.series('cleanImages', 'images', 'cleanStyles', 'devStyles', 'cleanScripts', 'devScripts', (done) => {
-  require('./tooling/server');
-  gulpLiveReload.listen();
+  browserSync.init({
+    server: './public',
+  });
   gulp.watch(srcPath('img', true), gulp.series('cleanImages', 'images'));
   gulp.watch(srcPath('scss', true), gulp.series('cleanStyles', 'devStyles'));
   gulp.watch(srcPath('js', true), gulp.series('cleanScripts', 'devScripts'));
+  gulp.watch('./public/index.html').on('change', browserSync.reload);
   done();
 }));
 
