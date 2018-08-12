@@ -16,7 +16,20 @@ const imageminPngquant = require('imagemin-pngquant');
 const imageminJpegRecompress = require('imagemin-jpeg-recompress');
 
 // Supported Browsers
-const supportedBrowsers = require('./tooling/browsers');
+const supportedBrowsers = [
+  'last 3 versions', // http://browserl.ist/?q=last+3+versions
+  'ie >= 10', // http://browserl.ist/?q=ie+%3E%3D+10
+  'edge >= 12', // http://browserl.ist/?q=edge+%3E%3D+12
+  'firefox >= 28', // http://browserl.ist/?q=firefox+%3E%3D+28
+  'chrome >= 21', // http://browserl.ist/?q=chrome+%3E%3D+21
+  'safari >= 6.1', // http://browserl.ist/?q=safari+%3E%3D+6.1
+  'opera >= 12.1', // http://browserl.ist/?q=opera+%3E%3D+12.1
+  'ios >= 7', // http://browserl.ist/?q=ios+%3E%3D+7
+  'android >= 4.4', // http://browserl.ist/?q=android+%3E%3D+4.4
+  'blackberry >= 10', // http://browserl.ist/?q=blackberry+%3E%3D+10
+  'operamobile >= 12.1', // http://browserl.ist/?q=operamobile+%3E%3D+12.1
+  'samsung >= 4', // http://browserl.ist/?q=samsung+%3E%3D+4
+];
 
 // Config
 const autoprefixConfig = { browsers: supportedBrowsers, cascade: false };
@@ -90,7 +103,7 @@ gulp.task('prodStyles', (done) => {
 gulp.task('devScripts', (done) => {
   pump([
     gulp.src(srcPath('js')),
-    webpackStream(require('./tooling/webpack.prod.js'), webpack),
+    webpackStream(require('./webpack/config.dev.js'), webpack),
     gulpSourcemaps.init({ loadMaps: true }),
     gulpBabel({ presets: [['env', babelConfig]] }),
     gulpSourcemaps.write('./'),
@@ -103,7 +116,7 @@ gulp.task('devScripts', (done) => {
 gulp.task('prodScripts', (done) => {
   pump([
     gulp.src(srcPath('js')),
-    webpackStream(require('./tooling/webpack.prod.js'), webpack),
+    webpackStream(require('./webpack/config.prod.js'), webpack),
     gulpSourcemaps.init({ loadMaps: true }),
     gulpBabel({ presets: [['env', babelConfig]] }),
     gulpUglify(),
