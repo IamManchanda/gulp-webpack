@@ -8,6 +8,7 @@ const browserSync = require('browser-sync').create();
 const vinylNamed = require('vinyl-named');
 const through2 = require('through2');
 const gulpZip = require('gulp-zip');
+const gulpUglify = require('gulp-uglify');
 const gulpAutoprefixer = require('gulp-autoprefixer');
 const gulpSourcemaps = require('gulp-sourcemaps');
 const gulpSass = require('gulp-sass');
@@ -108,6 +109,7 @@ const scripts = (done, mode) => {
       cb();
     }),
     gulpBabel({ presets: [['env', babelConfig]] }),
+    ...((mode === 'production') ? [gulpUglify()] : []),
     gulpSourcemaps.write('./'),
     gulp.dest(distPath('js')),
     browserSync.stream(),

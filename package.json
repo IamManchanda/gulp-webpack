@@ -24,6 +24,7 @@
     "gulp-imagemin": "^4.1.0",
     "gulp-sass": "^4.0.1",
     "gulp-sourcemaps": "^2.6.4",
+    "gulp-uglify": "^3.0.1",
     "gulp-zip": "^4.2.0",
     "imagemin-gifsicle": "^5.2.0",
     "imagemin-jpeg-recompress": "^5.1.0",
