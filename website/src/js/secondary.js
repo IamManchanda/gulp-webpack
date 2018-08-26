@@ -1,5 +1,1 @@
-const secondary = function () {
-  return 'Secondary Script';
-};
-
-export default secondary;
+export default () => 'Secondary Script';
