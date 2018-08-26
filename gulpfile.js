@@ -63,7 +63,6 @@ const cleanImages = () => del([distPath('img')]); // Clean Images
 const cleanStyles = () => del([distPath('css')]); // Clean Styles
 const cleanScripts = () => del([distPath('js')]); // Clean Scripts
 const cleanMarkup = () => del([distPath('html')]); // Clean Markup
-const cleanExport = () => del(['./website.zip']); // Clean Exported zip
 
 // Images Task
 const images = (mode) => (done) => {
@@ -138,16 +137,21 @@ const markup = (mode) => (done) => {
  * Above tasks inserted in these main gulp tasks through `gulp.series`
 */
 
+// Combine all these above coding tasks into one array!
+const allCodeTasks = (mode) => [
+  cleanImages, 
+  images(mode),
+  cleanStyles, 
+  styles(mode), 
+  cleanScripts, 
+  scripts(mode), 
+  cleanMarkup, 
+  markup(mode),
+];
+
 // Default (`npm start` or `yarn start`)
 gulp.task('default', gulp.series(
-  cleanImages, 
-  images('production'), 
-  cleanStyles, 
-  styles('production'), 
-  cleanScripts, 
-  scripts('production'), 
-  cleanMarkup, 
-  markup('production'), 
+  ...allCodeTasks('production'),
   (done) => {
     browserSync.init({
       port: 8000,
@@ -163,14 +167,7 @@ gulp.task('default', gulp.series(
 
 // Dev (`npm run dev` or `yarn run dev`)
 gulp.task('dev', gulp.series(
-  cleanImages, 
-  images('development'), 
-  cleanStyles, 
-  styles('development'), 
-  cleanScripts, 
-  scripts('development'), 
-  cleanMarkup, 
-  markup('development'), 
+  ...allCodeTasks('development'), 
   (done) => {
     browserSync.init({
       port: 3000,
@@ -184,17 +181,17 @@ gulp.task('dev', gulp.series(
   },
 ));
 
+/**
+ * Exporting the code into a Zip File!
+*/
+
+// Clean the zip file
+const cleanExport = () => del(['./website.zip']); // Clean Exported zip
+
 // Export (`npm run export` or `yarn run export`)
 gulp.task('export', gulp.series(
   cleanExport, 
-  cleanImages, 
-  images('production'), 
-  cleanStyles, 
-  styles('production'), 
-  cleanScripts, 
-  scripts('production'), 
-  cleanMarkup, 
-  markup('production'), 
+  ...allCodeTasks('production'), 
   (done) => {
     pump([
       gulp.src(exportPath),
