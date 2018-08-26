@@ -17,9 +17,11 @@ For Live reloading, Browsersync has been used. For ES6 Transpilation, Babel has 
 
 ## Usage
 
-- **Start the Project (for Development)** - `npm start` or `yarn start`.
-- **Build the Project (for Production)** - `npm run build` or `yarn run build`
+- **Start the Project (for Development)** - `npm start` or `yarn start`. The development port is `3000`.
+- **Build the Project (for Production) and Serve locally** - `npm run build` or `yarn run build`. The development port is `8000`.
 - **Exporting the Project to zip file** - `npm run export` or `yarn run export`
+
+Important Note: Don't run these npm scripts simultaneously.
 
 ## Appendix
 
