@@ -126,6 +126,7 @@ const scripts = (mode) => (done) => {
   ], done) : undefined;
 };
 
+// Markup Tasks
 const markup = (mode) => (done) => {
   ['development', 'production'].includes(mode) ? pump([
     gulp.src(srcPath('html')),
@@ -146,6 +147,7 @@ const allCodeTasks = (mode) => [
   markup(mode),
 ];
 
+// Generic Task for both Development and Production
 const genericTask = (mode) => {
   let port;
   if (mode === 'development') port = '3000';
@@ -155,7 +157,7 @@ const genericTask = (mode) => {
     ...allCodeTasks(mode),
     (done) => {
       browserSync.init({ port, server: distPath('html', true) });
-      gulp.watch(srcPath('img', true)).on('all', gulp.series(cleanImages, images), browserSync.reload);
+      gulp.watch(srcPath('img', true)).on('all', gulp.series(cleanImages, images(mode)), browserSync.reload);
       gulp.watch(srcPath('scss', true)).on('all', gulp.series(cleanStyles, styles(mode)), browserSync.reload);
       gulp.watch(srcPath('js', true)).on('all', gulp.series(cleanScripts, scripts(mode)), browserSync.reload);
       gulp.watch(srcPath('html')).on('all', browserSync.reload);
@@ -165,13 +167,13 @@ const genericTask = (mode) => {
 };
 
 /**
- * Main Gulp Tasks that are inserted within `package.json`
+ * Main Gulp Build Tasks for both Development and Production that are inserted within `package.json`
 */
 
-// Default (`npm start` or `yarn start`)
+// Default (`npm start` or `yarn start`) => Production
 gulp.task('default', gulp.series(...genericTask('production')));
 
-// Dev (`npm run dev` or `yarn run dev`)
+// Dev (`npm run dev` or `yarn run dev`) => Development
 gulp.task('dev', gulp.series(...genericTask('development')));
 
 /**
