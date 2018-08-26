@@ -16,6 +16,7 @@ const postcssUncss = require('postcss-uncss');
 const gulpSass = require('gulp-sass');
 const gulpBabel = require('gulp-babel');
 const gulpImagemin = require('gulp-imagemin');
+const gulpHtmlmin = require('gulp-htmlmin');
 const imageminPngquant = require('imagemin-pngquant');
 const imageminJpegRecompress = require('imagemin-jpeg-recompress');
 
@@ -40,17 +41,20 @@ const autoprefixConfig = { browsers: supportedBrowsers, cascade: false };
 const babelConfig = { targets: { browsers: supportedBrowsers } };
 
 // Paths for reuse
-const exportPath = './website/**/*';
+const exportPath = './website/dist/**/*';
 const srcPath = (file, watch = false) => {
   if (file === 'scss' && watch === false) return './website/src/scss/styles.scss';
   if (file === 'scss' && watch === true) return './website/src/scss/**/*.scss';
   if (file === 'js' && watch === false) return './website/src/js/scripts.js';
   if (file === 'js' && watch === true) return './website/src/js/**/*.js';
+  if (file === 'html') return './website/src/**/*.html';
   if (file === 'img') return './website/src/img/**/*.{png,jpeg,jpg,svg,gif}';
   console.error('Unsupported file type entered into Gulp Task Runner for Source Path');
 };
-const distPath = (file) => {
+const distPath = (file, serve = false) => {
   if (['css', 'js', 'img'].includes(file)) return `./website/dist/${file}`;
+  if (file === 'html' && serve === false) return './website/dist/**/*.html';
+  if (file === 'html' && serve === true) return './website/dist';
   console.error('Unsupported file type entered into Gulp Task Runner for Dist Path');
 };
 
@@ -58,6 +62,7 @@ const distPath = (file) => {
 const cleanImages = () => del([distPath('img')]); // Clean Images
 const cleanStyles = () => del([distPath('css')]); // Clean Styles
 const cleanScripts = () => del([distPath('js')]); // Clean Scripts
+const cleanMarkup = () => del(['']); // Clean Markup
 const cleanExport = () => del(['./website.zip']); // Clean Exported zip
 
 // Images Task
@@ -84,7 +89,7 @@ const styles = (done, mode) => {
   else if (mode === 'production') outputStyle = 'compressed';
   const postcssPlugins = [
     autoprefixer(autoprefixConfig),
-    postcssUncss({ html: ['website/index.html'] }),
+    postcssUncss({ html: [distPath('html')] }),
   ];
   pump([
     gulp.src(srcPath('scss')),
@@ -124,39 +129,49 @@ const scripts = (done, mode) => {
 const devScripts = (done) => scripts(done, 'development');
 const prodScripts = (done) => scripts(done, 'production');
 
+const markup = (done, mode) => {
+  pump([
+    gulp.src(srcPath('html')),
+    ...((mode === 'production') ? [gulpHtmlmin({ collapseWhitespace: true })] : []),
+    gulp.dest(distPath('html', true)),
+  ], done);
+};
+const devMarkup = (done) => markup(done, 'development');
+const prodMarkup = (done) => markup(done, 'production');
+
 /**
  * Main Gulp Tasks that are inserted within `package.json`
  * Above tasks inserted in these main gulp tasks through `gulp.series`
 */
 
 // Default (`npm start` or `yarn start`)
-gulp.task('default', gulp.series(cleanImages, images, cleanStyles, prodStyles, cleanScripts, prodScripts, (done) => {
+gulp.task('default', gulp.series(cleanImages, images, cleanStyles, prodStyles, cleanScripts, prodScripts, cleanMarkup, prodMarkup, (done) => {
   browserSync.init({
     port: 8000,
-    server: './website',
+    server: distPath('html', true),
   });
   gulp.watch(srcPath('img', true)).on('all', gulp.series(cleanImages, images), browserSync.reload);
   gulp.watch(srcPath('scss', true)).on('all', gulp.series(cleanStyles, prodStyles), browserSync.reload);
   gulp.watch(srcPath('js', true)).on('all', gulp.series(cleanScripts, prodScripts), browserSync.reload);
-  gulp.watch('./website/**/*.html').on('all', browserSync.reload);
+  gulp.watch(srcPath('html')).on('all', browserSync.reload);
   done();
 }));
 
 // Dev (`npm run dev` or `yarn run dev`)
-gulp.task('dev', gulp.series(cleanImages, images, cleanStyles, devStyles, cleanScripts, devScripts, (done) => {
+gulp.task('dev', gulp.series(cleanImages, images, cleanStyles, devStyles, cleanScripts, devScripts, cleanMarkup, devMarkup, (done) => {
   browserSync.init({
     port: 3000,
-    server: './website',
+    server: distPath('html', true),
   });
   gulp.watch(srcPath('img', true)).on('all', gulp.series(cleanImages, images), browserSync.reload);
   gulp.watch(srcPath('scss', true)).on('all', gulp.series(cleanStyles, devStyles), browserSync.reload);
   gulp.watch(srcPath('js', true)).on('all', gulp.series(cleanScripts, devScripts), browserSync.reload);
-  gulp.watch('./website/**/*.html').on('all', browserSync.reload);
+  gulp.watch(srcPath('html')).on('all', browserSync.reload);
   done();
 }));
 
 // Export (`npm run export` or `yarn run export`)
-gulp.task('export', gulp.series(cleanExport, cleanImages, images, cleanStyles, prodStyles, cleanScripts, prodScripts, (done) => {
+gulp.task('export', gulp.series(cleanExport, cleanImages, images, cleanStyles, prodStyles, cleanScripts, prodScripts, cleanMarkup, prodMarkup, (done) => {
   pump([
     gulp.src(exportPath),
     gulpZip('./website.zip'),

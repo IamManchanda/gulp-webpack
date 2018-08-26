@@ -21,6 +21,7 @@
     "eslint-plugin-import": "^2.13.0",
     "gulp": "^4.0.0",
     "gulp-babel": "^7.0.1",
+    "gulp-htmlmin": "^4.0.0",
     "gulp-imagemin": "^4.1.0",
     "gulp-postcss": "^8.0.0",
     "gulp-sass": "^4.0.1",
