@@ -154,10 +154,7 @@ const genericTask = (mode) => {
   return [
     ...allCodeTasks(mode),
     (done) => {
-      browserSync.init({
-        port,
-        server: distPath('html', true),
-      });
+      browserSync.init({ port, server: distPath('html', true) });
       gulp.watch(srcPath('img', true)).on('all', gulp.series(cleanImages, images), browserSync.reload);
       gulp.watch(srcPath('scss', true)).on('all', gulp.series(cleanStyles, styles(mode)), browserSync.reload);
       gulp.watch(srcPath('js', true)).on('all', gulp.series(cleanScripts, scripts(mode)), browserSync.reload);
