@@ -12,5 +12,5 @@ class Person {
 }
 
 const harry = new Person('Harman Manchanda');
-document.write(harry.hello());
+console.log(harry.hello());
 console.log(secondary());

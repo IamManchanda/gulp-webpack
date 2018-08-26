@@ -124,20 +124,7 @@ const prodScripts = (done) => scripts(done, 'production');
 */
 
 // Default (`npm start` or `yarn start`)
-gulp.task('default', gulp.series(cleanImages, images, cleanStyles, devStyles, cleanScripts, devScripts, (done) => {
-  browserSync.init({
-    port: 3000,
-    server: './website',
-  });
-  gulp.watch(srcPath('img', true)).on('all', gulp.series(cleanImages, images), browserSync.reload);
-  gulp.watch(srcPath('scss', true)).on('all', gulp.series(cleanStyles, devStyles), browserSync.reload);
-  gulp.watch(srcPath('js', true)).on('all', gulp.series(cleanScripts, devScripts), browserSync.reload);
-  gulp.watch('./website/**/*.html').on('all', browserSync.reload);
-  done();
-}));
-
-// Build (`npm run build` or `yarn run build`)
-gulp.task('build', gulp.series(cleanImages, images, cleanStyles, prodStyles, cleanScripts, prodScripts, (done) => {
+gulp.task('default', gulp.series(cleanImages, images, cleanStyles, prodStyles, cleanScripts, prodScripts, (done) => {
   browserSync.init({
     port: 8000,
     server: './website',
@@ -145,6 +132,19 @@ gulp.task('build', gulp.series(cleanImages, images, cleanStyles, prodStyles, cle
   gulp.watch(srcPath('img', true)).on('all', gulp.series(cleanImages, images), browserSync.reload);
   gulp.watch(srcPath('scss', true)).on('all', gulp.series(cleanStyles, prodStyles), browserSync.reload);
   gulp.watch(srcPath('js', true)).on('all', gulp.series(cleanScripts, prodScripts), browserSync.reload);
+  gulp.watch('./website/**/*.html').on('all', browserSync.reload);
+  done();
+}));
+
+// Dev (`npm run dev` or `yarn run dev`)
+gulp.task('dev', gulp.series(cleanImages, images, cleanStyles, devStyles, cleanScripts, devScripts, (done) => {
+  browserSync.init({
+    port: 3000,
+    server: './website',
+  });
+  gulp.watch(srcPath('img', true)).on('all', gulp.series(cleanImages, images), browserSync.reload);
+  gulp.watch(srcPath('scss', true)).on('all', gulp.series(cleanStyles, devStyles), browserSync.reload);
+  gulp.watch(srcPath('js', true)).on('all', gulp.series(cleanScripts, devScripts), browserSync.reload);
   gulp.watch('./website/**/*.html').on('all', browserSync.reload);
   done();
 }));
