@@ -86,6 +86,7 @@ const styles = (mode) => (done) => {
   let outputStyle;
   if (mode === 'development') outputStyle = 'nested';
   else if (mode === 'production') outputStyle = 'compressed';
+  else outputStyle = undefined;
   const postcssPlugins = [
     autoprefixer(autoprefixConfig),
     postcssUncss({ html: [distPath('html')] }),
@@ -106,6 +107,7 @@ const scripts = (mode) => (done) => {
   let streamMode;
   if (mode === 'development') streamMode = require('./webpack/config.development.js');
   else if (mode === 'production') streamMode = require('./webpack/config.production.js');
+  else streamMode = undefined;
   ['development', 'production'].includes(mode) ? pump([
     gulp.src(srcPath('js')),
     vinylNamed(),
@@ -132,11 +134,6 @@ const markup = (mode) => (done) => {
   ], done) : undefined;
 };
 
-/**
- * Main Gulp Tasks that are inserted within `package.json`
- * Above tasks inserted in these main gulp tasks through `gulp.series`
-*/
-
 // Combine all these above coding tasks into one array!
 const allCodeTasks = (mode) => [
   cleanImages, 
@@ -149,37 +146,36 @@ const allCodeTasks = (mode) => [
   markup(mode),
 ];
 
+const genericTask = (mode) => {
+  let port;
+  if (mode === 'development') port = '3000';
+  else if (mode === 'production') port = '8000';
+  else port = undefined;
+  return [
+    ...allCodeTasks(mode),
+    (done) => {
+      browserSync.init({
+        port,
+        server: distPath('html', true),
+      });
+      gulp.watch(srcPath('img', true)).on('all', gulp.series(cleanImages, images), browserSync.reload);
+      gulp.watch(srcPath('scss', true)).on('all', gulp.series(cleanStyles, styles(mode)), browserSync.reload);
+      gulp.watch(srcPath('js', true)).on('all', gulp.series(cleanScripts, scripts(mode)), browserSync.reload);
+      gulp.watch(srcPath('html')).on('all', browserSync.reload);
+      done();
+    },
+  ];
+};
+
+/**
+ * Main Gulp Tasks that are inserted within `package.json`
+*/
+
 // Default (`npm start` or `yarn start`)
-gulp.task('default', gulp.series(
-  ...allCodeTasks('production'),
-  (done) => {
-    browserSync.init({
-      port: 8000,
-      server: distPath('html', true),
-    });
-    gulp.watch(srcPath('img', true)).on('all', gulp.series(cleanImages, images), browserSync.reload);
-    gulp.watch(srcPath('scss', true)).on('all', gulp.series(cleanStyles, styles('production')), browserSync.reload);
-    gulp.watch(srcPath('js', true)).on('all', gulp.series(cleanScripts, scripts('production')), browserSync.reload);
-    gulp.watch(srcPath('html')).on('all', browserSync.reload);
-    done();
-  },
-));
+gulp.task('default', gulp.series(...genericTask('production')));
 
 // Dev (`npm run dev` or `yarn run dev`)
-gulp.task('dev', gulp.series(
-  ...allCodeTasks('development'), 
-  (done) => {
-    browserSync.init({
-      port: 3000,
-      server: distPath('html', true),
-    });
-    gulp.watch(srcPath('img', true)).on('all', gulp.series(cleanImages, images), browserSync.reload);
-    gulp.watch(srcPath('scss', true)).on('all', gulp.series(cleanStyles, styles('development')), browserSync.reload);
-    gulp.watch(srcPath('js', true)).on('all', gulp.series(cleanScripts, scripts('development')), browserSync.reload);
-    gulp.watch(srcPath('html')).on('all', browserSync.reload);
-    done();
-  },
-));
+gulp.task('dev', gulp.series(...genericTask('development')));
 
 /**
  * Exporting the code into a Zip File!
