@@ -12,6 +12,7 @@ const gulpUglify = require('gulp-uglify');
 const gulpSourcemaps = require('gulp-sourcemaps');
 const gulpPostcss = require('gulp-postcss');
 const autoprefixer = require('autoprefixer');
+const postcssUncss = require('postcss-uncss');
 const gulpSass = require('gulp-sass');
 const gulpBabel = require('gulp-babel');
 const gulpImagemin = require('gulp-imagemin');
@@ -83,6 +84,7 @@ const styles = (done, mode) => {
   else if (mode === 'production') outputStyle = 'compressed';
   const postcssPlugins = [
     autoprefixer(autoprefixConfig),
+    postcssUncss({ html: ['website/index.html'] }),
   ];
   pump([
     gulp.src(srcPath('scss')),
