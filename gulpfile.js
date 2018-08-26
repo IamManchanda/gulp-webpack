@@ -9,8 +9,9 @@ const vinylNamed = require('vinyl-named');
 const through2 = require('through2');
 const gulpZip = require('gulp-zip');
 const gulpUglify = require('gulp-uglify');
-const gulpAutoprefixer = require('gulp-autoprefixer');
 const gulpSourcemaps = require('gulp-sourcemaps');
+const gulpPostcss = require('gulp-postcss');
+const autoprefixer = require('autoprefixer');
 const gulpSass = require('gulp-sass');
 const gulpBabel = require('gulp-babel');
 const gulpImagemin = require('gulp-imagemin');
@@ -80,11 +81,14 @@ const styles = (done, mode) => {
   let outputStyle;
   if (mode === 'development') outputStyle = 'nested';
   else if (mode === 'production') outputStyle = 'compressed';
+  const postcssPlugins = [
+    autoprefixer(autoprefixConfig),
+  ];
   pump([
     gulp.src(srcPath('scss')),
     gulpSourcemaps.init({ loadMaps: true }),
-    gulpAutoprefixer(autoprefixConfig),
     gulpSass({ outputStyle }),
+    gulpPostcss(postcssPlugins),
     gulpSourcemaps.write('./'),
     gulp.dest(distPath('css')),
     browserSync.stream(),
