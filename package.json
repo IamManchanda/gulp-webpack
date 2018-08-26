@@ -11,6 +11,7 @@
     "export": "gulp export"
   },
   "devDependencies": {
+    "autoprefixer": "^9.1.3",
     "babel-core": "^6.26.3",
     "babel-preset-env": "^1.7.0",
     "browser-sync": "^2.24.6",
@@ -19,9 +20,9 @@
     "eslint-config-airbnb-base": "^13.0.0",
     "eslint-plugin-import": "^2.13.0",
     "gulp": "^4.0.0",
-    "gulp-autoprefixer": "^5.0.0",
     "gulp-babel": "^7.0.1",
     "gulp-imagemin": "^4.1.0",
+    "gulp-postcss": "^8.0.0",
     "gulp-sass": "^4.0.1",
     "gulp-sourcemaps": "^2.6.4",
     "gulp-uglify": "^3.0.1",
