@@ -35,4 +35,4 @@ Important Note: Don't run these npm scripts simultaneously.
 This is the result of performance tests within [Lighthouse](https://developers.google.com/web/tools/lighthouse/) for Production Mode. It's Not excellent (yet!), but still quite good actually.
 ![97% Performance][perf]
 
-[perf]: https://i.imgur.com/c74m4u5.png
+[perf]: https://i.imgur.com/1KBt91t.png
