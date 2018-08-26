@@ -66,8 +66,8 @@ const cleanMarkup = () => del([distPath('html')]); // Clean Markup
 const cleanExport = () => del(['./website.zip']); // Clean Exported zip
 
 // Images Task
-const images = (done) => {
-  pump([
+const images = (mode) => (done) => {
+  ['development', 'production'].includes(mode) ? pump([
     gulp.src(srcPath('img')),
     gulpImagemin([
       gulpImagemin.gifsicle(),
@@ -79,7 +79,7 @@ const images = (done) => {
     ]),
     gulp.dest(distPath('img')),
     browserSync.stream(),
-  ], done);
+  ], done) : undefined;
 };
 
 // Styles Task
@@ -91,7 +91,7 @@ const styles = (mode) => (done) => {
     autoprefixer(autoprefixConfig),
     postcssUncss({ html: [distPath('html')] }),
   ];
-  pump([
+  ['development', 'production'].includes(mode) ? pump([
     gulp.src(srcPath('scss')),
     gulpSourcemaps.init({ loadMaps: true }),
     gulpSass({ outputStyle }),
@@ -99,7 +99,7 @@ const styles = (mode) => (done) => {
     gulpSourcemaps.write('./'),
     gulp.dest(distPath('css')),
     browserSync.stream(),
-  ], done);
+  ], done) : undefined;
 };
 
 // Scripts Task
@@ -107,7 +107,7 @@ const scripts = (mode) => (done) => {
   let streamMode;
   if (mode === 'development') streamMode = require('./webpack/config.development.js');
   else if (mode === 'production') streamMode = require('./webpack/config.production.js');
-  pump([
+  ['development', 'production'].includes(mode) ? pump([
     gulp.src(srcPath('js')),
     vinylNamed(),
     webpackStream(streamMode, webpack),
@@ -122,15 +122,15 @@ const scripts = (mode) => (done) => {
     gulpSourcemaps.write('./'),
     gulp.dest(distPath('js')),
     browserSync.stream(),
-  ], done);
+  ], done) : undefined;
 };
 
 const markup = (mode) => (done) => {
-  pump([
+  ['development', 'production'].includes(mode) ? pump([
     gulp.src(srcPath('html')),
     ...((mode === 'production') ? [gulpHtmlmin({ collapseWhitespace: true })] : []),
     gulp.dest(distPath('html', true)),
-  ], done);
+  ], done) : undefined;
 };
 
 /**
@@ -141,7 +141,7 @@ const markup = (mode) => (done) => {
 // Default (`npm start` or `yarn start`)
 gulp.task('default', gulp.series(
   cleanImages, 
-  images, 
+  images('production'), 
   cleanStyles, 
   styles('production'), 
   cleanScripts, 
@@ -164,7 +164,7 @@ gulp.task('default', gulp.series(
 // Dev (`npm run dev` or `yarn run dev`)
 gulp.task('dev', gulp.series(
   cleanImages, 
-  images, 
+  images('development'), 
   cleanStyles, 
   styles('development'), 
   cleanScripts, 
@@ -188,7 +188,7 @@ gulp.task('dev', gulp.series(
 gulp.task('export', gulp.series(
   cleanExport, 
   cleanImages, 
-  images, 
+  images('production'), 
   cleanStyles, 
   styles('production'), 
   cleanScripts, 
