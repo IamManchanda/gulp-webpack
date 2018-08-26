@@ -38,17 +38,17 @@ const autoprefixConfig = { browsers: supportedBrowsers, cascade: false };
 const babelConfig = { targets: { browsers: supportedBrowsers } };
 
 // Paths for reuse
-const exportPath = './public/**/*';
+const exportPath = './website/**/*';
 const srcPath = (file, watch = false) => {
-  if (file === 'scss' && watch === false) return './public/src/scss/styles.scss';
-  if (file === 'scss' && watch === true) return './public/src/scss/**/*.scss';
-  if (file === 'js' && watch === false) return './public/src/js/scripts.js';
-  if (file === 'js' && watch === true) return './public/src/js/**/*.js';
-  if (file === 'img') return './public/src/img/**/*.{png,jpeg,jpg,svg,gif}';
+  if (file === 'scss' && watch === false) return './website/src/scss/styles.scss';
+  if (file === 'scss' && watch === true) return './website/src/scss/**/*.scss';
+  if (file === 'js' && watch === false) return './website/src/js/scripts.js';
+  if (file === 'js' && watch === true) return './website/src/js/**/*.js';
+  if (file === 'img') return './website/src/img/**/*.{png,jpeg,jpg,svg,gif}';
   console.error('Unsupported file type entered into Gulp Task Runner for Source Path');
 };
 const distPath = (file) => {
-  if (['css', 'js', 'img'].includes(file)) return `./public/dist/${file}`;
+  if (['css', 'js', 'img'].includes(file)) return `./website/dist/${file}`;
   console.error('Unsupported file type entered into Gulp Task Runner for Dist Path');
 };
 
@@ -126,12 +126,12 @@ const prodScripts = (done) => scripts(done, 'production');
 // Default (`npm start` or `yarn start`)
 gulp.task('default', gulp.series(cleanImages, images, cleanStyles, devStyles, cleanScripts, devScripts, (done) => {
   browserSync.init({
-    server: './public',
+    server: './website',
   });
   gulp.watch(srcPath('img', true)).on('all', gulp.series(cleanImages, images), browserSync.reload);
   gulp.watch(srcPath('scss', true)).on('all', gulp.series(cleanStyles, devStyles), browserSync.reload);
   gulp.watch(srcPath('js', true)).on('all', gulp.series(cleanScripts, devScripts), browserSync.reload);
-  gulp.watch('./public/**/*.html').on('all', browserSync.reload);
+  gulp.watch('./website/**/*.html').on('all', browserSync.reload);
   done();
 }));
 
