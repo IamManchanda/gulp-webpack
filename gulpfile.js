@@ -62,12 +62,11 @@ const distPath = (file, serve = false) => {
 const cleanImages = () => del([distPath('img')]); // Clean Images
 const cleanStyles = () => del([distPath('css')]); // Clean Styles
 const cleanScripts = () => del([distPath('js')]); // Clean Scripts
-const cleanMarkup = () => del(['']); // Clean Markup
-const cleanExport = () => del(['./website.zip']); // Clean Exported zip
+const cleanMarkup = () => del([distPath('html')]); // Clean Markup
 
 // Images Task
-const images = (done) => {
-  pump([
+const images = (mode) => (done) => {
+  ['development', 'production'].includes(mode) ? pump([
     gulp.src(srcPath('img')),
     gulpImagemin([
       gulpImagemin.gifsicle(),
@@ -79,11 +78,11 @@ const images = (done) => {
     ]),
     gulp.dest(distPath('img')),
     browserSync.stream(),
-  ], done);
+  ], done) : undefined;
 };
 
 // Styles Task
-const styles = (done, mode) => {
+const styles = (mode) => (done) => {
   let outputStyle;
   if (mode === 'development') outputStyle = 'nested';
   else if (mode === 'production') outputStyle = 'compressed';
@@ -91,7 +90,7 @@ const styles = (done, mode) => {
     autoprefixer(autoprefixConfig),
     postcssUncss({ html: [distPath('html')] }),
   ];
-  pump([
+  ['development', 'production'].includes(mode) ? pump([
     gulp.src(srcPath('scss')),
     gulpSourcemaps.init({ loadMaps: true }),
     gulpSass({ outputStyle }),
@@ -99,17 +98,15 @@ const styles = (done, mode) => {
     gulpSourcemaps.write('./'),
     gulp.dest(distPath('css')),
     browserSync.stream(),
-  ], done);
+  ], done) : undefined;
 };
-const devStyles = (done) => styles(done, 'development');
-const prodStyles = (done) => styles(done, 'production');
 
 // Scripts Task
-const scripts = (done, mode) => {
+const scripts = (mode) => (done) => {
   let streamMode;
   if (mode === 'development') streamMode = require('./webpack/config.development.js');
   else if (mode === 'production') streamMode = require('./webpack/config.production.js');
-  pump([
+  ['development', 'production'].includes(mode) ? pump([
     gulp.src(srcPath('js')),
     vinylNamed(),
     webpackStream(streamMode, webpack),
@@ -124,57 +121,82 @@ const scripts = (done, mode) => {
     gulpSourcemaps.write('./'),
     gulp.dest(distPath('js')),
     browserSync.stream(),
-  ], done);
+  ], done) : undefined;
 };
-const devScripts = (done) => scripts(done, 'development');
-const prodScripts = (done) => scripts(done, 'production');
 
-const markup = (done, mode) => {
-  pump([
+const markup = (mode) => (done) => {
+  ['development', 'production'].includes(mode) ? pump([
     gulp.src(srcPath('html')),
     ...((mode === 'production') ? [gulpHtmlmin({ collapseWhitespace: true })] : []),
     gulp.dest(distPath('html', true)),
-  ], done);
+  ], done) : undefined;
 };
-const devMarkup = (done) => markup(done, 'development');
-const prodMarkup = (done) => markup(done, 'production');
 
 /**
  * Main Gulp Tasks that are inserted within `package.json`
  * Above tasks inserted in these main gulp tasks through `gulp.series`
 */
 
+// Combine all these above coding tasks into one array!
+const allCodeTasks = (mode) => [
+  cleanImages, 
+  images(mode),
+  cleanStyles, 
+  styles(mode), 
+  cleanScripts, 
+  scripts(mode), 
+  cleanMarkup, 
+  markup(mode),
+];
+
 // Default (`npm start` or `yarn start`)
-gulp.task('default', gulp.series(cleanImages, images, cleanStyles, prodStyles, cleanScripts, prodScripts, cleanMarkup, prodMarkup, (done) => {
-  browserSync.init({
-    port: 8000,
-    server: distPath('html', true),
-  });
-  gulp.watch(srcPath('img', true)).on('all', gulp.series(cleanImages, images), browserSync.reload);
-  gulp.watch(srcPath('scss', true)).on('all', gulp.series(cleanStyles, prodStyles), browserSync.reload);
-  gulp.watch(srcPath('js', true)).on('all', gulp.series(cleanScripts, prodScripts), browserSync.reload);
-  gulp.watch(srcPath('html')).on('all', browserSync.reload);
-  done();
-}));
+gulp.task('default', gulp.series(
+  ...allCodeTasks('production'),
+  (done) => {
+    browserSync.init({
+      port: 8000,
+      server: distPath('html', true),
+    });
+    gulp.watch(srcPath('img', true)).on('all', gulp.series(cleanImages, images), browserSync.reload);
+    gulp.watch(srcPath('scss', true)).on('all', gulp.series(cleanStyles, styles('production')), browserSync.reload);
+    gulp.watch(srcPath('js', true)).on('all', gulp.series(cleanScripts, scripts('production')), browserSync.reload);
+    gulp.watch(srcPath('html')).on('all', browserSync.reload);
+    done();
+  },
+));
 
 // Dev (`npm run dev` or `yarn run dev`)
-gulp.task('dev', gulp.series(cleanImages, images, cleanStyles, devStyles, cleanScripts, devScripts, cleanMarkup, devMarkup, (done) => {
-  browserSync.init({
-    port: 3000,
-    server: distPath('html', true),
-  });
-  gulp.watch(srcPath('img', true)).on('all', gulp.series(cleanImages, images), browserSync.reload);
-  gulp.watch(srcPath('scss', true)).on('all', gulp.series(cleanStyles, devStyles), browserSync.reload);
-  gulp.watch(srcPath('js', true)).on('all', gulp.series(cleanScripts, devScripts), browserSync.reload);
-  gulp.watch(srcPath('html')).on('all', browserSync.reload);
-  done();
-}));
+gulp.task('dev', gulp.series(
+  ...allCodeTasks('development'), 
+  (done) => {
+    browserSync.init({
+      port: 3000,
+      server: distPath('html', true),
+    });
+    gulp.watch(srcPath('img', true)).on('all', gulp.series(cleanImages, images), browserSync.reload);
+    gulp.watch(srcPath('scss', true)).on('all', gulp.series(cleanStyles, styles('development')), browserSync.reload);
+    gulp.watch(srcPath('js', true)).on('all', gulp.series(cleanScripts, scripts('development')), browserSync.reload);
+    gulp.watch(srcPath('html')).on('all', browserSync.reload);
+    done();
+  },
+));
+
+/**
+ * Exporting the code into a Zip File!
+*/
+
+// Clean the zip file
+const cleanExport = () => del(['./website.zip']); // Clean Exported zip
 
 // Export (`npm run export` or `yarn run export`)
-gulp.task('export', gulp.series(cleanExport, cleanImages, images, cleanStyles, prodStyles, cleanScripts, prodScripts, cleanMarkup, prodMarkup, (done) => {
-  pump([
-    gulp.src(exportPath),
-    gulpZip('./website.zip'),
-    gulp.dest('./'),
-  ], done);
-}));
+gulp.task('export', gulp.series(
+  cleanExport, 
+  ...allCodeTasks('production'), 
+  (done) => {
+    pump([
+      gulp.src(exportPath),
+      gulpZip('./website.zip'),
+      gulp.dest('./'),
+    ], done);
+  },
+));
