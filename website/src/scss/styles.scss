@@ -1,3 +1,7 @@
+@import '_vendors/font-awesome/scss/fontawesome.scss';
+@import '_vendors/font-awesome/scss/solid.scss';
+@import '_vendors/font-awesome/scss/brands.scss';
+
 @import 'base/minireset';
 
 $primary-background-color: #D1E5E1;
@@ -20,4 +24,22 @@ h1, p {
   font-weight: 300;
   margin-bottom: 1.5rem;
   padding: 0 1rem;
+}
+
+.user {
+  @include fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-user);
+  }
+}
+
+.twitter {
+  @include fa-icon;
+  @extend .fab;
+
+  &:before {
+    content: fa-content($fa-var-twitter);
+  }
 }
