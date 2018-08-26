@@ -62,7 +62,7 @@ const distPath = (file, serve = false) => {
 const cleanImages = () => del([distPath('img')]); // Clean Images
 const cleanStyles = () => del([distPath('css')]); // Clean Styles
 const cleanScripts = () => del([distPath('js')]); // Clean Scripts
-const cleanMarkup = () => del(['']); // Clean Markup
+const cleanMarkup = () => del([distPath('html')]); // Clean Markup
 const cleanExport = () => del(['./website.zip']); // Clean Exported zip
 
 // Images Task
