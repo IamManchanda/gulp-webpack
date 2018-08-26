@@ -86,6 +86,7 @@ const styles = (mode) => (done) => {
   let outputStyle;
   if (mode === 'development') outputStyle = 'nested';
   else if (mode === 'production') outputStyle = 'compressed';
+  else outputStyle = undefined;
   const postcssPlugins = [
     autoprefixer(autoprefixConfig),
     postcssUncss({ html: [distPath('html')] }),
@@ -106,6 +107,7 @@ const scripts = (mode) => (done) => {
   let streamMode;
   if (mode === 'development') streamMode = require('./webpack/config.development.js');
   else if (mode === 'production') streamMode = require('./webpack/config.production.js');
+  else streamMode = undefined;
   ['development', 'production'].includes(mode) ? pump([
     gulp.src(srcPath('js')),
     vinylNamed(),
@@ -148,6 +150,7 @@ const genericTask = (mode) => {
   let port;
   if (mode === 'development') port = '3000';
   else if (mode === 'production') port = '8000';
+  else port = undefined;
   return [
     ...allCodeTasks(mode),
     (done) => {
