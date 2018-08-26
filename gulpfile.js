@@ -150,7 +150,7 @@ gulp.task('build', gulp.series(cleanImages, images, cleanStyles, prodStyles, cle
 }));
 
 // Export (`npm run export` or `yarn run export`)
-gulp.task('export', gulp.series(cleanExport, 'build', (done) => {
+gulp.task('export', gulp.series(cleanExport, cleanImages, images, cleanStyles, prodStyles, cleanScripts, prodScripts, (done) => {
   pump([
     gulp.src(exportPath),
     gulpZip('./website.zip'),
