@@ -85,7 +85,7 @@ const cleanMarkup = (mode) => () => {
 // Clean the zip file
 const cleanExport = (mode) => () => {
   return ['development', 'production'].includes(mode) ? del(['./website.zip']) : undefined;
-}; // Clean Exported zip
+};
 
 /**
  * Building Tasks 
