@@ -58,11 +58,38 @@ const distPath = (file, serve = false) => {
   console.error('Unsupported file type entered into Gulp Task Runner for Dist Path');
 };
 
-// Cleaning Tasks
-const cleanImages = () => del([distPath('img')]); // Clean Images
-const cleanStyles = () => del([distPath('css')]); // Clean Styles
-const cleanScripts = () => del([distPath('js')]); // Clean Scripts
-const cleanMarkup = () => del([distPath('html')]); // Clean Markup
+/**
+ * Cleaning Tasks
+*/
+
+// Clean Images
+const cleanImages = (mode) => () => {
+  return ['development', 'production'].includes(mode) ? del([distPath('img')]) : undefined;
+};
+
+// Clean Styles
+const cleanStyles = (mode) => () => {
+  return ['development', 'production'].includes(mode) ? del([distPath('css')]) : undefined;
+};
+
+// Clean Scripts
+const cleanScripts = (mode) => () => {
+  return ['development', 'production'].includes(mode) ? del([distPath('js')]) : undefined;
+};
+
+// Clean Markup
+const cleanMarkup = (mode) => () => {
+  return ['development', 'production'].includes(mode) ? del([distPath('html')]) : undefined;
+};
+
+// Clean the zip file
+const cleanExport = (mode) => () => {
+  return ['development', 'production'].includes(mode) ? del(['./website.zip']) : undefined;
+}; // Clean Exported zip
+
+/**
+ * Building Tasks 
+*/
 
 // Images Task
 const images = (mode) => (done) => {
@@ -87,10 +114,12 @@ const styles = (mode) => (done) => {
   if (mode === 'development') outputStyle = 'nested';
   else if (mode === 'production') outputStyle = 'compressed';
   else outputStyle = undefined;
+
   const postcssPlugins = [
     autoprefixer(autoprefixConfig),
     postcssUncss({ html: [distPath('html')] }),
   ];
+  
   ['development', 'production'].includes(mode) ? pump([
     gulp.src(srcPath('scss')),
     gulpSourcemaps.init({ loadMaps: true }),
@@ -108,6 +137,7 @@ const scripts = (mode) => (done) => {
   if (mode === 'development') streamMode = require('./webpack/config.development.js');
   else if (mode === 'production') streamMode = require('./webpack/config.production.js');
   else streamMode = undefined;
+
   ['development', 'production'].includes(mode) ? pump([
     gulp.src(srcPath('js')),
     vinylNamed(),
@@ -135,63 +165,111 @@ const markup = (mode) => (done) => {
   ], done) : undefined;
 };
 
-// Combine all these above coding tasks into one array!
-const allCodeTasks = (mode) => [
-  cleanImages, 
-  images(mode),
-  cleanStyles, 
-  styles(mode), 
-  cleanScripts, 
-  scripts(mode), 
-  cleanMarkup, 
-  markup(mode),
-];
+/**
+ * Generic Task for all Main Gulp Build/Export Tasks
+*/
 
-// Generic Task for both Development and Production
-const genericTask = (mode) => {
+// Generic Task
+const genericTask = (mode, context = 'building') => {
   let port;
-  if (mode === 'development') port = '3000';
-  else if (mode === 'production') port = '8000';
-  else port = undefined;
-  return [
-    ...allCodeTasks(mode),
-    (done) => {
-      browserSync.init({ port, server: distPath('html', true) });
-      gulp.watch(srcPath('img', true)).on('all', gulp.series(cleanImages, images(mode)), browserSync.reload);
-      gulp.watch(srcPath('scss', true)).on('all', gulp.series(cleanStyles, styles(mode)), browserSync.reload);
-      gulp.watch(srcPath('js', true)).on('all', gulp.series(cleanScripts, scripts(mode)), browserSync.reload);
-      gulp.watch(srcPath('html')).on('all', browserSync.reload);
-      done();
-    },
+  let modeName;
+
+  if (mode === 'development') {
+    port = '3000';
+    modeName = 'Development Mode';
+  } else if (mode === 'production') {
+    port = '8000';
+    modeName = 'Production Mode';
+  } else {
+    port = undefined;
+    modeName = undefined;
+  }
+
+  // Combine all booting tasks into one array!
+  const allBootingTasks = [
+    Object.assign(cleanImages(mode), { displayName: `Booting Images Task: Clean - ${modeName}` }),
+    Object.assign(images(mode), { displayName: `Booting Images Task: Build - ${modeName}` }),
+    Object.assign(cleanStyles(mode), { displayName: `Booting Styles Task: Clean - ${modeName}` }),
+    Object.assign(styles(mode), { displayName: `Booting Styles Task: Build - ${modeName}` }),
+    Object.assign(cleanScripts(mode), { displayName: `Booting Scripts Task: Clean - ${modeName}` }),
+    Object.assign(scripts(mode), { displayName: `Booting Scripts Task: Build - ${modeName}` }),
+    Object.assign(cleanMarkup(mode), { displayName: `Booting Markup Task: Clean - ${modeName}` }),
+    Object.assign(markup(mode), { displayName: `Booting Markup Task: Build - ${modeName}` }),
   ];
-};
 
-/**
- * Main Gulp Build Tasks for both Development and Production that are inserted within `package.json`
-*/
+  // Browser Loading & Watching
+  const browserLoadingWatching = (done) => {
+    browserSync.init({ port, server: distPath('html', true) });
 
-// Default (`npm start` or `yarn start`) => Production
-gulp.task('default', gulp.series(...genericTask('production')));
+    // Watch - Images
+    gulp.watch(srcPath('img', true))
+      .on('all', gulp.series(
+        Object.assign(cleanImages(mode), { displayName: `Watching Images Task: Clean - ${modeName}` }),
+        Object.assign(images(mode), { displayName: `Watching Images Task: Build - ${modeName}` }),
+      ), browserSync.reload);
 
-// Dev (`npm run dev` or `yarn run dev`) => Development
-gulp.task('dev', gulp.series(...genericTask('development')));
+    // Watch - Styles
+    gulp.watch(srcPath('scss', true))
+      .on('all', gulp.series(
+        Object.assign(cleanStyles(mode), { displayName: `Watching Styles Task: Clean - ${modeName}` }),
+        Object.assign(styles(mode), { displayName: `Watching Styles Task: Build - ${modeName}` }),
+      ), browserSync.reload);
 
-/**
- * Exporting the code into a Zip File!
-*/
+    // Watch - Scripts
+    gulp.watch(srcPath('js', true))
+      .on('all', gulp.series(
+        Object.assign(cleanScripts(mode), { displayName: `Watching Scripts Task: Clean - ${modeName}` }),
+        Object.assign(scripts(mode), { displayName: `Watching Scripts Task: Build - ${modeName}` }),
+      ), browserSync.reload);
 
-// Clean the zip file
-const cleanExport = () => del(['./website.zip']); // Clean Exported zip
-
-// Export (`npm run export` or `yarn run export`)
-gulp.task('export', gulp.series(
-  cleanExport, 
-  ...allCodeTasks('production'), 
-  (done) => {
+    // Watch - Markup
+    gulp.watch(srcPath('html'), true)
+      .on('all', gulp.series(
+        Object.assign(cleanMarkup(mode), { displayName: `Watching Markup Task: Clean - ${modeName}` }),
+        Object.assign(markup(mode), { displayName: `Watching Markup Task: Build - ${modeName}` }),
+      ), browserSync.reload);
+    done();
+  };
+  
+  // Exporting Zip
+  const exportingZip = (done) => {
     pump([
       gulp.src(exportPath),
       gulpZip('./website.zip'),
       gulp.dest('./'),
     ], done);
-  },
-));
+  };
+  
+  // Returning Tasks based on Exporting Context 
+  if (context === 'exporting') {
+    return [
+      cleanExport(mode), 
+      ...allBootingTasks,
+      Object.assign(exportingZip, { displayName: `Exporting Zip Task - ${modeName}` }),
+    ];
+  }
+
+  // Returning Tasks based on Building Context
+  if (context === 'building') {
+    return [
+      ...allBootingTasks,
+      Object.assign(browserLoadingWatching, { displayName: `Browser Loading & Watching Task - ${modeName}` }),
+    ];
+  }
+
+  // No Side-Effects Please
+  return undefined;
+};
+
+/**
+ * Main Gulp Build/Export Tasks that are inserted within `package.json`
+*/
+
+// Default (`npm start` or `yarn start`) => Production
+gulp.task('default', gulp.series(...genericTask('production', 'building')));
+
+// Dev (`npm run dev` or `yarn run dev`) => Development
+gulp.task('dev', gulp.series(...genericTask('development', 'building')));
+
+// Export (`npm run export` or `yarn run export`)
+gulp.task('export', gulp.series(...genericTask('production', 'exporting')));
