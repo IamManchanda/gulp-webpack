@@ -62,22 +62,22 @@ const distPath = (file, serve = false) => {
  * Cleaning Tasks
 */
 
-// Clean Images
+// Clean Images Task
 const cleanImages = (mode) => () => {
   return ['development', 'production'].includes(mode) ? del([distPath('img')]) : undefined;
 };
 
-// Clean Styles
+// Clean Styles Task
 const cleanStyles = (mode) => () => {
   return ['development', 'production'].includes(mode) ? del([distPath('css')]) : undefined;
 };
 
-// Clean Scripts
+// Clean Scripts Task
 const cleanScripts = (mode) => () => {
   return ['development', 'production'].includes(mode) ? del([distPath('js')]) : undefined;
 };
 
-// Clean Markup
+// Clean Markup Task
 const cleanMarkup = (mode) => () => {
   return ['development', 'production'].includes(mode) ? del([distPath('html')]) : undefined;
 };
@@ -91,7 +91,7 @@ const cleanExport = (mode) => () => {
  * Building Tasks 
 */
 
-// Images Task
+// Build Images Task
 const images = (mode) => (done) => {
   ['development', 'production'].includes(mode) ? pump([
     gulp.src(srcPath('img')),
@@ -108,7 +108,7 @@ const images = (mode) => (done) => {
   ], done) : undefined;
 };
 
-// Styles Task
+// Build Styles Task
 const styles = (mode) => (done) => {
   let outputStyle;
   if (mode === 'development') outputStyle = 'nested';
@@ -131,7 +131,7 @@ const styles = (mode) => (done) => {
   ], done) : undefined;
 };
 
-// Scripts Task
+// Build Scripts Task
 const scripts = (mode) => (done) => {
   let streamMode;
   if (mode === 'development') streamMode = require('./webpack/config.development.js');
@@ -156,7 +156,7 @@ const scripts = (mode) => (done) => {
   ], done) : undefined;
 };
 
-// Markup Tasks
+// Build Markup Tasks
 const markup = (mode) => (done) => {
   ['development', 'production'].includes(mode) ? pump([
     gulp.src(srcPath('html')),
