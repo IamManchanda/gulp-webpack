@@ -62,6 +62,11 @@ const distPath = (file, serve = false) => {
  * Cleaning Tasks
 */
 
+// Clean Markup Task
+const cleanMarkup = (mode) => () => {
+  return ['development', 'production'].includes(mode) ? del([distPath('html')]) : undefined;
+};
+
 // Clean Images Task
 const cleanImages = (mode) => () => {
   return ['development', 'production'].includes(mode) ? del([distPath('img')]) : undefined;
@@ -77,11 +82,6 @@ const cleanScripts = (mode) => () => {
   return ['development', 'production'].includes(mode) ? del([distPath('js')]) : undefined;
 };
 
-// Clean Markup Task
-const cleanMarkup = (mode) => () => {
-  return ['development', 'production'].includes(mode) ? del([distPath('html')]) : undefined;
-};
-
 // Clean the zip file
 const cleanExport = (mode) => () => {
   return ['development', 'production'].includes(mode) ? del(['./website.zip']) : undefined;
@@ -90,6 +90,15 @@ const cleanExport = (mode) => () => {
 /**
  * Building Tasks 
 */
+
+// Build Markup Tasks
+const buildMarkup = (mode) => (done) => {
+  ['development', 'production'].includes(mode) ? pump([
+    gulp.src(srcPath('html')),
+    ...((mode === 'production') ? [gulpHtmlmin({ collapseWhitespace: true })] : []),
+    gulp.dest(distPath('html', true)),
+  ], done) : undefined;
+};
 
 // Build Images Task
 const buildImages = (mode) => (done) => {
@@ -156,15 +165,6 @@ const buildScripts = (mode) => (done) => {
   ], done) : undefined;
 };
 
-// Build Markup Tasks
-const buildMarkup = (mode) => (done) => {
-  ['development', 'production'].includes(mode) ? pump([
-    gulp.src(srcPath('html')),
-    ...((mode === 'production') ? [gulpHtmlmin({ collapseWhitespace: true })] : []),
-    gulp.dest(distPath('html', true)),
-  ], done) : undefined;
-};
-
 /**
  * Generic Task for all Main Gulp Build/Export Tasks
 */
@@ -187,19 +187,27 @@ const genericTask = (mode, context = 'building') => {
 
   // Combine all booting tasks into one array!
   const allBootingTasks = [
+    Object.assign(cleanMarkup(mode), { displayName: `Booting Markup Task: Clean - ${modeName}` }),
+    Object.assign(buildMarkup(mode), { displayName: `Booting Markup Task: Build - ${modeName}` }),
     Object.assign(cleanImages(mode), { displayName: `Booting Images Task: Clean - ${modeName}` }),
     Object.assign(buildImages(mode), { displayName: `Booting Images Task: Build - ${modeName}` }),
     Object.assign(cleanStyles(mode), { displayName: `Booting Styles Task: Clean - ${modeName}` }),
     Object.assign(buildStyles(mode), { displayName: `Booting Styles Task: Build - ${modeName}` }),
     Object.assign(cleanScripts(mode), { displayName: `Booting Scripts Task: Clean - ${modeName}` }),
     Object.assign(buildScripts(mode), { displayName: `Booting Scripts Task: Build - ${modeName}` }),
-    Object.assign(cleanMarkup(mode), { displayName: `Booting Markup Task: Clean - ${modeName}` }),
-    Object.assign(buildMarkup(mode), { displayName: `Booting Markup Task: Build - ${modeName}` }),
   ];
 
   // Browser Loading & Watching
   const browserLoadingWatching = (done) => {
     browserSync.init({ port, server: distPath('html', true) });
+
+    // Watch - Markup
+    gulp.watch(srcPath('html'), true)
+      .on('all', gulp.series(
+        Object.assign(cleanMarkup(mode), { displayName: `Watching Markup Task: Clean - ${modeName}` }),
+        Object.assign(buildMarkup(mode), { displayName: `Watching Markup Task: Build - ${modeName}` }),
+      ), browserSync.reload);
+    done();
 
     // Watch - Images
     gulp.watch(srcPath('img', true))
@@ -221,14 +229,6 @@ const genericTask = (mode, context = 'building') => {
         Object.assign(cleanScripts(mode), { displayName: `Watching Scripts Task: Clean - ${modeName}` }),
         Object.assign(buildScripts(mode), { displayName: `Watching Scripts Task: Build - ${modeName}` }),
       ), browserSync.reload);
-
-    // Watch - Markup
-    gulp.watch(srcPath('html'), true)
-      .on('all', gulp.series(
-        Object.assign(cleanMarkup(mode), { displayName: `Watching Markup Task: Clean - ${modeName}` }),
-        Object.assign(buildMarkup(mode), { displayName: `Watching Markup Task: Build - ${modeName}` }),
-      ), browserSync.reload);
-    done();
   };
   
   // Exporting Zip
