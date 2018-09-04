@@ -78,5 +78,5 @@ jspm_packages
 dist
 
 # Build Files
-public/dist
+website/dist
 website.zip
