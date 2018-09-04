@@ -20,6 +20,12 @@ const gulpHtmlmin = require('gulp-htmlmin');
 const imageminPngquant = require('imagemin-pngquant');
 const imageminJpegRecompress = require('imagemin-jpeg-recompress');
 
+// Entry point retreive from webpack
+const entry = require('./webpack/entry');
+
+// Transform Entry point into an Array for defining in gulp file
+const entryArray = Object.values(entry);
+
 // Supported Browsers
 const supportedBrowsers = [
   'last 3 versions', // http://browserl.ist/?q=last+3+versions
@@ -45,7 +51,7 @@ const exportPath = './website/dist/**/*';
 const srcPath = (file, watch = false) => {
   if (file === 'scss' && watch === false) return './website/src/scss/styles.scss';
   if (file === 'scss' && watch === true) return './website/src/scss/**/*.scss';
-  if (file === 'js' && watch === false) return './website/src/js/scripts.js';
+  if (file === 'js' && watch === false) return entryArray;
   if (file === 'js' && watch === true) return './website/src/js/**/*.js';
   if (file === 'html') return './website/src/**/*.html';
   if (file === 'img') return './website/src/img/**/*.{png,jpeg,jpg,svg,gif}';

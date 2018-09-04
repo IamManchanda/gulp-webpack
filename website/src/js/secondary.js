@@ -1,1 +1,1 @@
-export default () => 'Secondary Script';
+console.log('Secondary Script');
