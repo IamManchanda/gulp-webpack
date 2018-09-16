@@ -19,6 +19,7 @@ const gulpImagemin = require('gulp-imagemin');
 const gulpHtmlmin = require('gulp-htmlmin');
 const imageminPngquant = require('imagemin-pngquant');
 const imageminJpegRecompress = require('imagemin-jpeg-recompress');
+const gulpEslint = require('gulp-eslint');
 
 // Entry point retreive from webpack
 const entry = require('./webpack/entry');
@@ -155,6 +156,8 @@ const buildScripts = (mode) => (done) => {
 
   ['development', 'production'].includes(mode) ? pump([
     gulp.src(srcPath('js')),
+    gulpEslint('./.eslintrc.js'),
+    gulpEslint.format(),
     vinylNamed(),
     webpackStream(streamMode, webpack),
     gulpSourcemaps.init({ loadMaps: true }),
